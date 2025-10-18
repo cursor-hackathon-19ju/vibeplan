@@ -58,14 +58,14 @@ export function Sidebar() {
     <aside
       className={cn(
         "hidden md:flex flex-col border-r border-primary/20 bg-white/60 backdrop-blur-md h-screen sticky top-0 transition-all duration-300",
-        isExpanded ? "w-64" : "w-20"
+        isExpanded ? "w-64" : "w-16"
       )}
     >
       {/* Logo */}
       <div
         className={cn(
           "flex items-center border-b border-primary/20 transition-all duration-300",
-          isExpanded ? "justify-between p-4 h-16" : "justify-center p-4 h-20"
+          isExpanded ? "justify-between p-4 h-16" : "justify-center p-2 h-16"
         )}
       >
         {isExpanded ? (
@@ -103,7 +103,7 @@ export function Sidebar() {
             onClick={() => setIsExpanded(true)}
           >
             <Link href="/" onClick={(e) => e.stopPropagation()}>
-              <div className="relative w-12 h-12">
+              <div className="relative w-10 h-10">
                 <Image
                   src={IconLogo}
                   alt="VibePlan"
@@ -120,7 +120,7 @@ export function Sidebar() {
       <nav
         className={cn(
           "flex-1 space-y-2 flex flex-col transition-all duration-300",
-          isExpanded ? "p-4" : "p-2 cursor-pointer"
+          isExpanded ? "p-4" : "p-1 items-center cursor-pointer"
         )}
         onClick={(e) => {
           if (!isExpanded && !(e.target as HTMLElement).closest("a, button")) {
@@ -134,7 +134,7 @@ export function Sidebar() {
             variant={isActive("/") ? "default" : "ghost"}
             className={cn(
               "w-full justify-start",
-              !isExpanded && "justify-center p-2"
+              !isExpanded && "justify-center p-0 h-12 w-12"
             )}
           >
             <PlusCircle className="h-5 w-5" />
@@ -200,7 +200,7 @@ export function Sidebar() {
           <Link href="/history" onClick={(e) => e.stopPropagation()}>
             <Button
               variant={isActive("/history") ? "default" : "ghost"}
-              className="w-full justify-center p-2"
+              className="w-12 h-12 justify-center p-0"
             >
               <History className="h-5 w-5" />
             </Button>
@@ -218,7 +218,7 @@ export function Sidebar() {
             variant={isActive("/about") ? "default" : "ghost"}
             className={cn(
               "w-full justify-start",
-              !isExpanded && "justify-center p-2"
+              !isExpanded && "justify-center p-0 h-12 w-12"
             )}
           >
             <Info className="h-5 w-5" />
@@ -232,7 +232,7 @@ export function Sidebar() {
             variant={isActive("/profile") ? "default" : "ghost"}
             className={cn(
               "w-full justify-start gap-2",
-              !isExpanded && "justify-center p-2"
+              !isExpanded && "justify-center p-0 h-12 w-12"
             )}
           >
             {user?.user_metadata?.avatar_url ? (
