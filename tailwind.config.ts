@@ -21,12 +21,12 @@ const config = {
       colors: {
         border: "hsl(214.3 31.8% 91.4%)",
         input: "hsl(214.3 31.8% 91.4%)",
-        ring: "hsl(221.2 83.2% 53.3%)",
+        ring: "hsl(220 60% 15%)",
         background: "#fcfcff",
         foreground: "hsl(222.2 84% 4.9%)",
         primary: {
-          DEFAULT: "hsl(221.2 83.2% 53.3%)",
-          foreground: "hsl(210 40% 98%)",
+          DEFAULT: "hsl(220 60% 15%)", // Very dark navy blue
+          foreground: "hsl(0 0% 100%)",
         },
         secondary: {
           DEFAULT: "hsl(210 40% 96.1%)",
@@ -52,6 +52,10 @@ const config = {
           DEFAULT: "hsl(0 0% 100%)",
           foreground: "hsl(222.2 84% 4.9%)",
         },
+      },
+      backgroundImage: {
+        'gradient-accent': 'linear-gradient(135deg, #ec4899 0%, #a855f7 50%, #10b981 100%)',
+        'gradient-accent-hover': 'linear-gradient(135deg, #db2777 0%, #9333ea 50%, #059669 100%)',
       },
       borderRadius: {
         lg: "0.5rem",

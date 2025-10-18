@@ -48,7 +48,7 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "hidden md:flex flex-col border-r bg-white h-screen sticky top-0 transition-all duration-300",
+        "hidden md:flex flex-col border-r border-white/40 bg-white/60 backdrop-blur-md h-screen sticky top-0 transition-all duration-300",
         isExpanded ? "w-64" : "w-20"
       )}
     >
@@ -56,7 +56,7 @@ export function Sidebar() {
       <div className="flex items-center justify-between p-4 h-16 border-b">
         {isExpanded && (
           <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-md">
               <span className="text-white font-bold text-lg">V</span>
             </div>
             <span className="font-serif italic text-xl">VibePlan</span>
@@ -64,7 +64,7 @@ export function Sidebar() {
         )}
         {!isExpanded && (
           <Link href="/" className="w-full flex justify-center">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-md">
               <span className="text-white font-bold text-lg">V</span>
             </div>
           </Link>
@@ -75,7 +75,7 @@ export function Sidebar() {
       <Button
         variant="ghost"
         size="icon"
-        className="absolute -right-3 top-20 h-6 w-6 rounded-full border bg-white shadow-md"
+        className="absolute -right-3 top-20 h-6 w-6 rounded-full border border-white/40 bg-white/80 backdrop-blur-sm shadow-lg shadow-black/5"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         {isExpanded ? (

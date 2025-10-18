@@ -40,10 +40,10 @@ export function MobileNav() {
 
   return (
     <div className="md:hidden">
-      <header className="sticky top-0 z-50 w-full border-b bg-white">
+      <header className="sticky top-0 z-50 w-full border-b border-white/40 bg-white/60 backdrop-blur-md">
         <div className="flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-md">
               <span className="text-white font-bold text-lg">V</span>
             </div>
             <span className="font-serif italic text-xl">VibePlan</span>
@@ -60,7 +60,7 @@ export function MobileNav() {
               <SheetHeader>
                 <SheetTitle className="text-left">
                   <Link href="/" className="flex items-center space-x-2" onClick={() => setOpen(false)}>
-                    <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-md">
                       <span className="text-white font-bold text-lg">V</span>
                     </div>
                     <span className="font-serif italic text-xl">VibePlan</span>
