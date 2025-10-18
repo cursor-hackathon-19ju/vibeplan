@@ -1,6 +1,10 @@
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { MapPin, DollarSign, Tag, ExternalLink } from "lucide-react"
+import Image from "next/image"
+import ExaLogo from "@/app/assets/exa.png"
+import TelegramLogo from "@/app/assets/telegram-app-48.png"
+import InstagramLogo from "@/app/assets/instagram-48.png"
 
 interface TimelineActivity {
   id: number
@@ -12,6 +16,7 @@ interface TimelineActivity {
   tags?: string[]
   discount?: string
   source_link?: string
+  source_type?: string
   coordinates?: {
     lat: number
     lng: number
@@ -21,6 +26,22 @@ interface TimelineActivity {
 interface TimelineActivityProps {
   activity: TimelineActivity
   isLast?: boolean
+}
+
+// Helper function to determine the source icon
+function getSourceIcon(activity: TimelineActivity) {
+  // Check if source_link contains instagram
+  if (activity.source_link && activity.source_link.includes('instagram.com')) {
+    return { logo: InstagramLogo, alt: 'Instagram' }
+  }
+
+  // Check if source_type is 'web' (from Exa)
+  if (activity.source_type === 'web') {
+    return { logo: ExaLogo, alt: 'Exa' }
+  }
+
+  // Default to Telegram for other sources
+  return { logo: TelegramLogo, alt: 'Telegram' }
 }
 
 export function TimelineActivity({ activity, isLast = false }: TimelineActivityProps) {
@@ -41,58 +62,71 @@ export function TimelineActivity({ activity, isLast = false }: TimelineActivityP
           <h3 className="text-base sm:text-lg font-semibold text-primary">
             {activity.time}
           </h3>
-          <h4 className="text-lg sm:text-xl font-serif italic mt-1">
+          <h4 className="text-lg sm:text-xl font-serif mt-1 mb-2">
             {activity.title}
           </h4>
+
+          {/* Description */}
+          <div
+            className="text-muted-foreground text-sm sm:text-base leading-relaxed mb-3 sm:mb-4"
+            dangerouslySetInnerHTML={{ __html: activity.description }}
+          />
         </div>
 
-        {/* Description */}
-        <div
-          className="text-muted-foreground text-sm sm:text-base leading-relaxed mb-3 sm:mb-4"
-          dangerouslySetInnerHTML={{ __html: activity.description }}
-        />
-
-        {/* Metadata */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
-          <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
-            <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-            <span className="break-words">{activity.location}</span>
-          </div>
-          {activity.price && (
-            <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
-              <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span>{activity.price}</span>
+        {/* Metadata and Source Link Row */}
+        <div className="flex flex-wrap items-center justify-between gap-3 my-4">
+          {/* Left: Metadata */}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
+            <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
+              <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+              <span className="break-words">{activity.location}</span>
             </div>
-          )}
-          {activity.discount && (
-            <Badge variant="secondary" className="text-xs flex-shrink-0">
-              {activity.discount}
-            </Badge>
-          )}
+            {activity.price && (
+              <div className="flex items-center flex-shrink-0">
+                <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span>{activity.price}</span>
+              </div>
+            )}
+            {activity.discount && (
+              <Badge variant="secondary" className="text-xs flex-shrink-0">
+                {activity.discount}
+              </Badge>
+            )}
+          </div>
+
+          {/* Right: Source Link */}
+          {activity.source_link && (() => {
+            const sourceIcon = getSourceIcon(activity)
+            return (
+              <a
+                href={activity.source_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm text-primary hover:underline flex-shrink-0"
+              >
+                <div className="relative w-4 h-4 flex-shrink-0">
+                  <Image
+                    src={sourceIcon.logo}
+                    alt={sourceIcon.alt}
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+                <span className="underline">View source</span>
+              </a>
+            )
+          })()}
         </div>
 
         {/* Tags */}
         {activity.tags && activity.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 sm:gap-1.5 mb-3 sm:mb-4">
+          <div className="flex flex-wrap gap-1 sm:gap-1.5">
             {activity.tags.map((tag) => (
               <Badge key={tag} variant="outline" className="text-xs">
                 {tag}
               </Badge>
             ))}
           </div>
-        )}
-
-        {/* Source Link */}
-        {activity.source_link && (
-          <a
-            href={activity.source_link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
-          >
-            <ExternalLink className="h-4 w-4" />
-            <span>View source</span>
-          </a>
         )}
       </div>
     </div>

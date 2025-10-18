@@ -111,7 +111,10 @@ export async function POST(request: NextRequest) {
       }
     );
 
-    const exaSummaries = exa_result.results.map((r: any) => JSON.parse(r.summary));
+    const exaSummaries = exa_result.results.map((r: any) => ({
+      ...JSON.parse(r.summary),
+      url: r.url
+    }));
     console.log(`✅ Exa: Found ${exaSummaries.length} activities`)
 
     // STEP 4: Combine ChromaDB and Exa activities
@@ -129,7 +132,7 @@ export async function POST(request: NextRequest) {
         validity_end: null,
         source_channel: 'exa',
         source_type: 'web',
-        source_link: null, // Exa results don't have source links
+        source_link: summary.url, // URL from Exa search result
         latitude: null, // Will be added by LLM
         longitude: null // Will be added by LLM
       }))
