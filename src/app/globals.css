@@ -54,3 +54,31 @@
   }
 }
 
+@keyframes pulse-border {
+  0% {
+    border-color: rgba(233, 213, 255, 0.3);
+    box-shadow: 0 0 0px rgba(233, 213, 255, 0);
+  }
+  25% {
+    border-color: rgba(251, 191, 36, 0.6);
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.3);
+  }
+  50% {
+    border-color: rgba(6, 182, 212, 0.8);
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
+  }
+  75% {
+    border-color: rgba(16, 185, 129, 0.6);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+  }
+  100% {
+    border-color: rgba(233, 213, 255, 0.3);
+    box-shadow: 0 0 0px rgba(233, 213, 255, 0);
+  }
+}
+
+.animate-pulse-border {
+  border: 2px solid rgba(233, 213, 255, 0.3);
+  animation: pulse-border 4s ease-in-out infinite;
+}
+

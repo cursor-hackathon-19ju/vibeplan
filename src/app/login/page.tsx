@@ -5,11 +5,14 @@ export const dynamic = 'force-dynamic'
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { createClient } from "@/lib/supabase"
+import IconLogo from "@/app/assets/Icon Logo.png"
+import FullLogo from "@/app/assets/Full Logo.png"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -66,12 +69,24 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-6">
         {/* Logo */}
         <div className="text-center">
-          <Link href="/" className="inline-flex items-center space-x-2">
-            <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-white font-bold text-2xl">V</span>
+          <div className="inline-flex items-end">
+            <div className="relative w-12 h-12 flex-shrink-0">
+              <Image
+                src={IconLogo}
+                alt="VibePlan Icon"
+                fill
+                className="object-contain"
+              />
             </div>
-            <span className="font-serif italic text-3xl">VibePlan</span>
-          </Link>
+            <div className="relative h-8 w-40">
+              <Image
+                src={FullLogo}
+                alt="VibePlan"
+                fill
+                className="object-contain object-left"
+              />
+            </div>
+          </div>
         </div>
 
         <Card>
