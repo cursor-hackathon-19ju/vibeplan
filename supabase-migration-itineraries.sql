@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS public.itineraries (
   start_date TEXT,
   end_date TEXT,
   
+  -- Public visibility
+  public BOOLEAN DEFAULT false,
+  
   -- Itinerary data (stored as JSONB for flexibility)
   itinerary_data JSONB NOT NULL
 );
@@ -24,14 +27,17 @@ CREATE INDEX IF NOT EXISTS idx_itineraries_user_id ON public.itineraries(user_id
 -- Create index on created_at for sorting
 CREATE INDEX IF NOT EXISTS idx_itineraries_created_at ON public.itineraries(created_at DESC);
 
+-- Create index on public column for faster public itinerary queries
+CREATE INDEX IF NOT EXISTS idx_itineraries_public ON public.itineraries(public) WHERE public = true;
+
 -- Enable Row Level Security
 ALTER TABLE public.itineraries ENABLE ROW LEVEL SECURITY;
 
--- Create policy: Users can only view their own itineraries
-CREATE POLICY "Users can view their own itineraries"
+-- Create policy: Users can view their own itineraries or public itineraries
+CREATE POLICY "Users can view their own itineraries or public itineraries"
   ON public.itineraries
   FOR SELECT
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = user_id OR public = true);
 
 -- Create policy: Users can only insert their own itineraries
 CREATE POLICY "Users can insert their own itineraries"
@@ -59,4 +65,5 @@ COMMENT ON TABLE public.itineraries IS 'Stores user-generated itineraries with s
 COMMENT ON COLUMN public.itineraries.itinerary_data IS 'Complete itinerary object containing title, summary, and activities array';
 COMMENT ON COLUMN public.itineraries.budget IS 'Budget level: 0=Broke Student, 1=Budget-Friendly, 2=Moderate, 3=Comfortable, 4=Atas Boss';
 COMMENT ON COLUMN public.itineraries.spicy IS 'Include drinks & nightlife: true/false';
+COMMENT ON COLUMN public.itineraries.public IS 'Whether the itinerary is publicly visible to all users';
 
