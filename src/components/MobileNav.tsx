@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Menu, X, PlusCircle, History, Info, User } from "lucide-react"
@@ -14,6 +14,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Separator } from "@/components/ui/separator"
+import { createClient } from "@/lib/supabase"
 
 const mockHistoryItems = [
   { id: 1, query: "Date night under $50", date: "2 days ago" },
@@ -23,7 +24,17 @@ const mockHistoryItems = [
 
 export function MobileNav() {
   const [open, setOpen] = useState(false)
+  const [user, setUser] = useState<any>(null)
   const pathname = usePathname()
+  const supabase = createClient()
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    }
+    getUser()
+  }, [supabase.auth])
 
   const isActive = (path: string) => pathname === path
 
@@ -82,7 +93,7 @@ export function MobileNav() {
                     {mockHistoryItems.map((item) => (
                       <Link
                         key={item.id}
-                        href="/history"
+                        href="/results"
                         onClick={() => setOpen(false)}
                         className="block p-2 hover:bg-accent rounded-md"
                       >
@@ -108,10 +119,19 @@ export function MobileNav() {
                 <Link href="/profile" onClick={() => setOpen(false)}>
                   <Button
                     variant={isActive("/profile") ? "default" : "ghost"}
-                    className="w-full justify-start"
+                    className="w-full justify-start gap-2"
                   >
-                    <User className="h-5 w-5 mr-2" />
-                    Profile
+                    {user?.user_metadata?.avatar_url ? (
+                      <img
+                        src={user.user_metadata.avatar_url}
+                        alt="Profile"
+                        className="w-5 h-5 rounded-full object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <User className="h-5 w-5" />
+                    )}
+                    {user?.user_metadata?.full_name || user?.user_metadata?.name || 'Profile'}
                   </Button>
                 </Link>
               </nav>

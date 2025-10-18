@@ -86,17 +86,20 @@ export default function ProfilePage() {
               <CardContent className="space-y-6">
                 {/* Avatar and Name */}
                 <div className="flex items-center space-x-4">
-                  <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-white text-2xl font-semibold">
-                    {user.user_metadata?.avatar_url ? (
+                  {user.user_metadata?.avatar_url ? (
+                    <div className="relative w-20 h-20 rounded-full overflow-hidden bg-primary">
                       <img
                         src={user.user_metadata.avatar_url}
                         alt="Profile"
-                        className="w-full h-full rounded-full object-cover"
+                        className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
                       />
-                    ) : (
+                    </div>
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-white text-2xl font-semibold">
                       <span>{user.email?.charAt(0).toUpperCase()}</span>
-                    )}
-                  </div>
+                    </div>
+                  )}
                   <div>
                     <h2 className="text-2xl font-semibold">
                       {user.user_metadata?.full_name || user.user_metadata?.name || 'User'}
