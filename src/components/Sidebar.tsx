@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { 
@@ -14,13 +14,13 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
+import { 
+  Collapsible, 
+  CollapsibleContent, 
+  CollapsibleTrigger 
+} from "@/components/ui/collapsible"
+import { createClient } from "@/lib/supabase"
 
 const mockHistoryItems = [
   { id: 1, query: "Date night under $50", date: "2 days ago" },
@@ -30,7 +30,18 @@ const mockHistoryItems = [
 
 export function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(true)
+  const [historyOpen, setHistoryOpen] = useState(true)
+  const [user, setUser] = useState<any>(null)
   const pathname = usePathname()
+  const supabase = createClient()
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    }
+    getUser()
+  }, [supabase.auth])
 
   const isActive = (path: string) => pathname === path
 
@@ -75,7 +86,7 @@ export function Sidebar() {
       </Button>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-2 flex flex-col">
         {/* New Activity */}
         <Link href="/">
           <Button
@@ -90,10 +101,10 @@ export function Sidebar() {
           </Button>
         </Link>
 
-        {/* History Dropdown */}
+        {/* History Collapsible Dropdown */}
         {isExpanded ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          <Collapsible open={historyOpen} onOpenChange={setHistoryOpen}>
+            <CollapsibleTrigger asChild>
               <Button
                 variant={isActive("/history") ? "default" : "ghost"}
                 className="w-full justify-between"
@@ -102,28 +113,30 @@ export function Sidebar() {
                   <History className="h-5 w-5" />
                   <span className="ml-2">History</span>
                 </div>
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className={cn(
+                  "h-4 w-4 transition-transform",
+                  historyOpen && "rotate-180"
+                )} />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              {mockHistoryItems.map((item) => (
-                <DropdownMenuItem key={item.id} asChild>
-                  <Link href="/history" className="cursor-pointer">
-                    <div className="flex flex-col">
-                      <span className="font-medium text-sm">{item.query}</span>
-                      <span className="text-xs text-muted-foreground">{item.date}</span>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-1">
+              <div className="ml-6 border-l-2 border-border pl-2 space-y-1">
+                {mockHistoryItems.map((item) => (
+                  <Link key={item.id} href="/results" onClick={(e) => e.stopPropagation()}>
+                    <div className="px-2 py-2 hover:bg-accent rounded-md cursor-pointer text-sm">
+                      <p className="font-medium truncate">{item.query}</p>
+                      <p className="text-xs text-muted-foreground">{item.date}</p>
                     </div>
                   </Link>
-                </DropdownMenuItem>
-              ))}
-              <Separator className="my-1" />
-              <DropdownMenuItem asChild>
-                <Link href="/history" className="cursor-pointer">
-                  View all history
+                ))}
+                <Link href="/history" onClick={(e) => e.stopPropagation()}>
+                  <div className="px-2 py-2 hover:bg-accent rounded-md cursor-pointer text-sm font-medium text-primary">
+                    View all history
+                  </div>
                 </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         ) : (
           <Link href="/history">
             <Button
@@ -134,6 +147,9 @@ export function Sidebar() {
             </Button>
           </Link>
         )}
+
+        {/* Spacer to push bottom items down */}
+        <div className="flex-1" />
 
         <Separator className="my-2" />
 
@@ -156,12 +172,25 @@ export function Sidebar() {
           <Button
             variant={isActive("/profile") ? "default" : "ghost"}
             className={cn(
-              "w-full justify-start",
+              "w-full justify-start gap-2",
               !isExpanded && "justify-center px-2"
             )}
           >
-            <User className="h-5 w-5" />
-            {isExpanded && <span className="ml-2">Profile</span>}
+            {user?.user_metadata?.avatar_url ? (
+              <img
+                src={user.user_metadata.avatar_url}
+                alt="Profile"
+                className="w-5 h-5 rounded-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <User className="h-5 w-5" />
+            )}
+            {isExpanded && (
+              <span className="truncate">
+                {user?.user_metadata?.full_name || user?.user_metadata?.name || 'Profile'}
+              </span>
+            )}
           </Button>
         </Link>
       </nav>

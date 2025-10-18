@@ -132,20 +132,20 @@ function ResultsContent() {
       <div className="flex-1">
         <MobileNav />
         
-        <main className="container max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
-          {/* Header */}
-          <div className="mb-6 md:mb-8 flex items-center gap-3 md:gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => router.push('/')}
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <Button onClick={() => router.push('/')} variant="outline">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refine Search
-            </Button>
+        <main className="container max-w-7xl mx-auto p-6 md:p-8">
+           {/* Header */}
+           <div className="mb-8 flex items-center gap-4">
+             <Button
+               variant="ghost"
+               size="icon"
+               onClick={() => router.push('/history')}
+             >
+               <ArrowLeft className="h-5 w-5" />
+             </Button>
+             <Button onClick={() => router.push('/')} variant="outline">
+               <RefreshCw className="h-4 w-4 mr-2" />
+               Refine Search
+             </Button>
             
             {/* Mobile Map Toggle */}
             <Sheet open={mapOpen} onOpenChange={setMapOpen}>

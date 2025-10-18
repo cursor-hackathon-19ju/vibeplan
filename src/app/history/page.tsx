@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { Sidebar } from "@/components/Sidebar"
 import { MobileNav } from "@/components/MobileNav"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -91,13 +92,13 @@ export default function HistoryPage() {
             </p>
           </div>
 
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             {mockHistory.map((item) => (
-              <Card key={item.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-4">
+              <Link key={item.id} href="/results">
+                <Card className="hover:shadow-md hover:border-cyan-400 transition-all cursor-pointer">
+                  <CardHeader>
                     <div className="flex-1">
-                      <CardTitle className="text-lg font-serif italic mb-2">
+                      <CardTitle className="text-lg font-medium font-sans mb-2">
                         {item.query}
                       </CardTitle>
                       <CardDescription className="flex items-center gap-2">
@@ -105,45 +106,41 @@ export default function HistoryPage() {
                         {item.timestamp} • {item.date}
                       </CardDescription>
                     </div>
-                    <Button variant="outline" size="sm">
-                      <Search className="h-4 w-4 mr-2" />
-                      View Results
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {/* Filters Used */}
-                    <div className="flex flex-wrap gap-2">
-                      {item.filters.activities.map((activity) => (
-                        <Badge key={activity} variant="secondary">
-                          {activity}
-                        </Badge>
-                      ))}
-                      {item.filters.budget !== undefined && (
-                        <Badge variant="outline">
-                          {budgetLabels[item.filters.budget]}
-                        </Badge>
-                      )}
-                      {item.filters.numPax && (
-                        <Badge variant="outline">
-                          {item.filters.numPax} pax
-                        </Badge>
-                      )}
-                      {item.filters.mbti && (
-                        <Badge variant="outline">
-                          {item.filters.mbti}
-                        </Badge>
-                      )}
-                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {/* Filters Used */}
+                      <div className="flex flex-wrap gap-2">
+                        {item.filters.activities.map((activity) => (
+                          <Badge key={activity} variant="secondary">
+                            {activity}
+                          </Badge>
+                        ))}
+                        {item.filters.budget !== undefined && (
+                          <Badge variant="outline">
+                            {budgetLabels[item.filters.budget]}
+                          </Badge>
+                        )}
+                        {item.filters.numPax && (
+                          <Badge variant="outline">
+                            {item.filters.numPax} pax
+                          </Badge>
+                        )}
+                        {item.filters.mbti && (
+                          <Badge variant="outline">
+                            {item.filters.mbti}
+                          </Badge>
+                        )}
+                      </div>
 
-                    {/* Results Count */}
-                    <p className="text-sm text-muted-foreground">
-                      Found {item.resultsCount} activities
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+                      {/* Results Count */}
+                      <p className="text-sm text-muted-foreground">
+                        Found {item.resultsCount} activities
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
 
             {mockHistory.length === 0 && (
