@@ -76,14 +76,33 @@ CANDIDATE ACTIVITIES:
 ${JSON.stringify(candidateActivities, null, 2)}
 
 TASK:
-Select 4-6 activities that best match the user's preferences and create a logical timeline.
+Analyze the user's query and create a logical itinerary:
+
+QUERY ANALYSIS:
+1. If the user asks for a specific type of venue (e.g., "brunch spots", "cafes", "bars"):
+   - Select ONLY 1-2 activities of that type
+   - This is a recommendation list, not a full-day itinerary
+   - Don't create a timeline with multiple identical meal types
+
+2. If the user asks for a full day/activity plan (e.g., "plan my weekend", "things to do"):
+   - Select 4-6 diverse activities
+   - Create a realistic full-day timeline
+   - Ensure logical flow and variety
+
+LOGICAL CONSTRAINTS (CRITICAL):
+- NEVER select multiple meals of the same type (e.g., NO "brunch → brunch → brunch")
+- NEVER select duplicate venue types unless creating a comparison list
+- A person can only eat one breakfast, one brunch, one lunch, and one dinner per day
+- Mix different activity types: meals + attractions + experiences + nightlife
+- For meal-specific queries, return 1-2 top recommendations, not a full itinerary
 
 REQUIREMENTS:
 1. Choose activities that fit the budget and preferences
 2. Create a realistic timeline with start/end times
-3. Consider logical flow (e.g., breakfast → lunch → activity → dinner)
+3. Ensure activities flow logically (breakfast 8-10AM → activity 10AM-2PM → lunch 12-2PM → activity 3-6PM → dinner 7-9PM)
 4. Add coordinates for each activity (use Singapore central: lat 1.290270, lng 103.851959 if missing)
-5. Return ONLY valid JSON
+5. For single-venue queries (brunch spots, cafes, bars), limit to 1-2 options
+6. Return ONLY valid JSON
 
 OUTPUT FORMAT:
 {
