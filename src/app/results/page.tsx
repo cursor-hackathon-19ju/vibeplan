@@ -38,7 +38,6 @@ const mockItinerary = {
       price: "$7.20",
       discount: "10% off",
       imageUrl: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=80",
-      tags: ["Breakfast", "Local", "Café"],
       coordinates: { lat: 1.2644, lng: 103.8220 }
     },
     {
@@ -53,7 +52,6 @@ const mockItinerary = {
       location: "Siloso Beach, Sentosa",
       price: "Free (Coconut: $4)",
       imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",
-      tags: ["Beach", "Nature", "Free Activity"],
       coordinates: { lat: 1.2471, lng: 103.8096 }
     },
     {
@@ -69,7 +67,6 @@ const mockItinerary = {
       price: "$18.50",
       discount: "10% off + Free drink",
       imageUrl: "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&q=80",
-      tags: ["Lunch", "Beachfront", "Western"],
       coordinates: { lat: 1.2475, lng: 103.8090 }
     },
     {
@@ -85,7 +82,6 @@ const mockItinerary = {
       price: "$55",
       discount: "$10 rebate",
       imageUrl: "https://images.unsplash.com/photo-1624286763166-c0e36ce59daf?w=800&q=80",
-      tags: ["Adventure", "Thrills", "Outdoor"],
       coordinates: { lat: 1.2494, lng: 103.8182 }
     },
     {
@@ -100,7 +96,6 @@ const mockItinerary = {
       location: "Fort Siloso, Sentosa",
       price: "$5",
       imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
-      tags: ["Sunset", "Views", "Photography"],
       coordinates: { lat: 1.2493, lng: 103.8069 }
     },
     {
@@ -115,7 +110,6 @@ const mockItinerary = {
       location: "Beach Station, Sentosa",
       price: "Free (Dinner est. $25)",
       imageUrl: "https://images.unsplash.com/photo-1533929736458-ca588d08c8be?w=800&q=80",
-      tags: ["Dinner", "Show", "Nightlife"],
       coordinates: { lat: 1.2500, lng: 103.8140 }
     }
   ]
@@ -132,7 +126,7 @@ function ResultsContent() {
       <div className="flex-1">
         <MobileNav />
         
-        <main className="container max-w-7xl mx-auto p-6 md:p-8">
+        <main className="container max-w-[1600px] mx-auto p-6 md:p-8">
            {/* Header */}
            <div className="mb-8 flex items-center gap-4">
              <Button
@@ -167,7 +161,7 @@ function ResultsContent() {
           </div>
 
           {/* Two Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-[55%_45%] gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_minmax(450px,45%)] gap-8">
             {/* Left Section - Itinerary */}
             <div>
               {/* Title */}
@@ -263,7 +257,7 @@ export default function ResultsPage() {
         <Sidebar />
         <div className="flex-1">
           <MobileNav />
-          <main className="container max-w-6xl mx-auto p-6 md:p-8">
+          <main className="container max-w-[1600px] mx-auto p-6 md:p-8">
             <p>Loading results...</p>
           </main>
         </div>
