@@ -1,9 +1,28 @@
+"use client"
+
 import { Sidebar } from "@/components/Sidebar"
 import { MobileNav } from "@/components/MobileNav"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Sparkles, Target, Heart, Zap } from "lucide-react"
+import { Sparkles, Target, Heart, Zap, AlertCircle } from "lucide-react"
+import { useEffect, useRef } from "react"
 
 export default function AboutPage() {
+  const telegramVideoRef = useRef<HTMLVideoElement>(null)
+  const tiktokVideoRef = useRef<HTMLVideoElement>(null)
+  const lemon8VideoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    // Set playback rate to 2x for all videos
+    if (telegramVideoRef.current) {
+      telegramVideoRef.current.playbackRate = 2.0
+    }
+    if (tiktokVideoRef.current) {
+      tiktokVideoRef.current.playbackRate = 2.0
+    }
+    if (lemon8VideoRef.current) {
+      lemon8VideoRef.current.playbackRate = 2.0
+    }
+  }, [])
   return (
     <div className="flex min-h-screen">
       <Sidebar />
@@ -22,6 +41,70 @@ export default function AboutPage() {
           </div>
 
           <div className="space-y-6">
+            {/* Pain Point */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-6 w-6 text-primary" />
+                  <CardTitle className="font-serif italic">Pain Point</CardTitle>
+                </div>
+                <CardDescription>
+                  Finding activities shouldn't feel like endless scrolling
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Telegram Column */}
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-center text-primary">Telegram</h3>
+                    <div className="relative aspect-[9/16] bg-black rounded-lg overflow-hidden">
+                      <video
+                        ref={telegramVideoRef}
+                        src="/assets/telechannel.mp4"
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+
+                  {/* TikTok Column */}
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-center text-primary">TikTok</h3>
+                    <div className="relative aspect-[9/16] bg-black rounded-lg overflow-hidden">
+                      <video
+                        ref={tiktokVideoRef}
+                        src="/assets/tiktokscroll.mp4"
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Lemon8 Column */}
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-center text-primary">Lemon8</h3>
+                    <div className="relative aspect-[9/16] bg-black rounded-lg overflow-hidden">
+                      <video
+                        ref={lemon8VideoRef}
+                        src="/assets/lemon8scroll.mp4"
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* What is VibePlan */}
             <Card>
               <CardHeader>
