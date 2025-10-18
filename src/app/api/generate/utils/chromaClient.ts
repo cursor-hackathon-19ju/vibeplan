@@ -21,7 +21,8 @@ export interface Activity {
   }
 }
 
-const CHROMADB_API_URL = 'http://localhost:8001'
+// Use environment variable for API URL, fallback to localhost for development
+const CHROMADB_API_URL = process.env.CHROMADB_API_URL || 'http://localhost:8001'
 
 export async function queryActivities(
   semanticQuery: string,

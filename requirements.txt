@@ -1,23 +1,24 @@
-# FastAPI Bridge Dependencies
+# FastAPI Bridge Dependencies (Required for production)
 fastapi==0.115.5
 uvicorn[standard]==0.34.0
 
-# ChromaDB and Embeddings
+# ChromaDB and Embeddings (Required for production)
 chromadb==1.2.0
 openai==2.5.0
 
-# Utilities
+# Utilities (Required for production)
 python-dotenv==1.0.1
 requests==2.32.3
 click==8.1.7
 
-# Data Scraping & Ingestion (Optional - for data pipeline)
-telethon==1.32.0
-selenium==4.15.0
-webdriver-manager==4.0.1
-beautifulsoup4==4.12.2
+# Data Scraping & Ingestion (Optional - only needed for data pipeline, not for API)
+# Uncomment these if you need to run data collection scripts
+# telethon==1.32.0
+# selenium==4.15.0
+# webdriver-manager==4.0.1
+# beautifulsoup4==4.12.2
 
-# Data Processing & Storage (Optional - for data pipeline)
-sqlalchemy==2.0.23
-pandas==2.2.3
-apscheduler==3.10.4
+# Data Processing & Storage (Optional - only needed for data pipeline)
+# sqlalchemy==2.0.23
+# pandas==2.2.3
+# apscheduler==3.10.4

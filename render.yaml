@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: vibeplan-chromadb-api
+    env: python
+    region: singapore
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python chromadb_api.py
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ALLOWED_ORIGINS
+        value: http://localhost:3000,https://vibeplan.vercel.app
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    disk:
+      name: chroma-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1

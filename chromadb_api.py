@@ -14,15 +14,19 @@ import os
 import json
 from dotenv import load_dotenv
 
-# Load environment variables from .env.local
-load_dotenv('.env.local')
+# Load environment variables from .env.local (development) or .env (production)
+load_dotenv('.env.local')  # For local development
+load_dotenv()  # For production
 
 app = FastAPI(title="ChromaDB API Bridge", version="1.0.0")
+
+# Get allowed origins from environment or use defaults
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
 
 # Enable CORS for Next.js
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -198,12 +202,15 @@ async def search_activities(request: SearchRequest):
 if __name__ == "__main__":
     import uvicorn
 
+    # Get port from environment variable (for Render.com) or default to 8001
+    port = int(os.getenv("PORT", "8001"))
+
     print("\n" + "="*60)
     print("🚀 Starting ChromaDB API Bridge")
     print("="*60)
     print(f"📍 ChromaDB path: {chroma_db_path}")
     print(f"🔑 OpenAI API key: {'✓ Set' if api_key else '✗ Not set'}")
-    print(f"🌐 Server will run on: http://localhost:8001")
+    print(f"🌐 Server will run on: http://0.0.0.0:{port}")
     print("="*60 + "\n")
 
-    uvicorn.run(app, host="0.0.0.0", port=8001, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
