@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 
 // TODO: Replace this with actual AI/LLM integration and database queries
 // This is a placeholder that returns mock itinerary data
@@ -67,8 +68,8 @@ export async function POST(request: NextRequest) {
     //   itinerary: Itinerary
     // }
 
-    // Return mock itinerary in the expected format
-    return NextResponse.json({
+    // Generate itinerary (currently mock data, will be replaced with AI)
+    const itineraryData = {
       title: "A sun-kissed escape: One Perfect day in Sentosa",
       summary: {
         intro: "☀️ Get ready for a sun-filled adventure across Sentosa Island — a day that balances sea breeze, local bites, and island thrills.",
@@ -87,7 +88,6 @@ export async function POST(request: NextRequest) {
           location: "VivoCity, HarbourFront",
           price: "$7.20",
           discount: "10% off",
-          imageUrl: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=80",
           coordinates: { lat: 1.2644, lng: 103.8220 }
         },
         {
@@ -97,7 +97,6 @@ export async function POST(request: NextRequest) {
           description: "Cross the <strong>Sentosa Boardwalk</strong> and head straight to <strong>Siloso Beach</strong>. Feel the soft sand between your toes and dive into the gentle waves. The morning sun isn't too harsh yet, making it perfect for a refreshing swim. Grab a coconut from a nearby vendor <strong>($4)</strong> and relax under a palm tree, watching kayakers glide across the turquoise waters.",
           location: "Siloso Beach, Sentosa",
           price: "Free (Coconut: $4)",
-          imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",
           coordinates: { lat: 1.2471, lng: 103.8096 }
         },
         {
@@ -108,7 +107,6 @@ export async function POST(request: NextRequest) {
           location: "Siloso Beach, Sentosa",
           price: "$18.50",
           discount: "10% off + Free drink",
-          imageUrl: "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&q=80",
           coordinates: { lat: 1.2475, lng: 103.8090 }
         },
         {
@@ -119,7 +117,6 @@ export async function POST(request: NextRequest) {
           location: "Imbiah Lookout, Sentosa",
           price: "$55",
           discount: "$10 rebate",
-          imageUrl: "https://images.unsplash.com/photo-1624286763166-c0e36ce59daf?w=800&q=80",
           coordinates: { lat: 1.2494, lng: 103.8182 }
         },
         {
@@ -129,7 +126,6 @@ export async function POST(request: NextRequest) {
           description: "Wind down your adventure at the <strong>Fort Siloso Skywalk</strong>, a glass-bottom walkway <strong>11 stories high</strong>. Watch the sun dip into the horizon, painting the sky in shades of amber and rose. Entry is just <strong>$5</strong>, and the views of the harbor, container ships, and neighboring islands are nothing short of spectacular.",
           location: "Fort Siloso, Sentosa",
           price: "$5",
-          imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
           coordinates: { lat: 1.2493, lng: 103.8069 }
         },
         {
@@ -139,10 +135,55 @@ export async function POST(request: NextRequest) {
           description: "Cap off the night with dinner at one of <strong>Sentosa's beachfront restaurants</strong> before catching the <strong>Wings of Time show at 8:40 PM</strong>. This open-air pyrotechnic and water show blends fire, lasers, and storytelling against the ocean backdrop. Best of all? It's <strong>free to watch</strong> from the beach, making it the perfect finale to your island escape.",
           location: "Beach Station, Sentosa",
           price: "Free (Dinner est. $25)",
-          imageUrl: "https://images.unsplash.com/photo-1533929736458-ca588d08c8be?w=800&q=80",
           coordinates: { lat: 1.2500, lng: 103.8140 }
         }
       ]
+    }
+
+    // Save to Supabase database
+    const supabase = await createServerSupabaseClient()
+    
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    
+    if (userError || !user) {
+      console.error('Error getting user:', userError)
+      return NextResponse.json(
+        { error: 'User not authenticated' },
+        { status: 401 }
+      )
+    }
+
+    // Insert itinerary into database
+    const { data: itinerary, error: insertError } = await supabase
+      .from('itineraries')
+      .insert({
+        user_id: user.id,
+        query: body.query || '',
+        activities: body.activities || [],
+        budget: body.budget || 0,
+        num_pax: body.numPax || '1',
+        mbti: body.mbti || null,
+        spicy: body.spicy || null,
+        start_date: body.startDate || null,
+        end_date: body.endDate || null,
+        itinerary_data: itineraryData
+      })
+      .select('id')
+      .single()
+
+    if (insertError) {
+      console.error('Error saving itinerary:', insertError)
+      return NextResponse.json(
+        { error: 'Failed to save itinerary' },
+        { status: 500 }
+      )
+    }
+
+    // Return both the itinerary data and the database ID
+    return NextResponse.json({
+      ...itineraryData,
+      itineraryId: itinerary.id
     })
   } catch (error) {
     console.error('Error generating itinerary:', error)

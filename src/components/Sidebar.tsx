@@ -25,16 +25,31 @@ import { createClient } from "@/lib/supabase"
 import IconLogo from "@/app/assets/Icon Logo.png"
 import FullLogo from "@/app/assets/Full Logo.png"
 
-const mockHistoryItems = [
-  { id: 1, query: "Date night under $50", date: "2 days ago" },
-  { id: 2, query: "Family weekend activities", date: "1 week ago" },
-  { id: 3, query: "Artsy cafes and museums", date: "2 weeks ago" },
-]
+interface HistoryItem {
+  id: string
+  query: string
+  created_at: string
+}
+
+function formatTimeAgo(dateString: string): string {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  const diffWeeks = Math.floor(diffDays / 7)
+
+  if (diffDays === 0) return "Today"
+  if (diffDays === 1) return "Yesterday"
+  if (diffDays < 7) return `${diffDays} days ago`
+  if (diffWeeks === 1) return "1 week ago"
+  return `${diffWeeks} weeks ago`
+}
 
 export function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(true)
   const [historyOpen, setHistoryOpen] = useState(true)
   const [user, setUser] = useState<any>(null)
+  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([])
   const pathname = usePathname()
   const supabase = createClient()
 
@@ -45,6 +60,40 @@ export function Sidebar() {
     }
     getUser()
   }, [supabase.auth])
+
+  useEffect(() => {
+    const fetchRecentHistory = async () => {
+      try {
+        const supabaseClient = createClient()
+        const { data: { user } } = await supabaseClient.auth.getUser()
+        
+        if (!user) {
+          setHistoryItems([])
+          return
+        }
+
+        const { data, error } = await supabaseClient
+          .from('itineraries')
+          .select('id, query, created_at')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(3)
+
+        if (error) {
+          console.error('Error fetching history:', error)
+          setHistoryItems([])
+          return
+        }
+
+        setHistoryItems(data || [])
+      } catch (err) {
+        console.error('Error:', err)
+        setHistoryItems([])
+      }
+    }
+
+    fetchRecentHistory()
+  }, [])
 
   const isActive = (path: string) => pathname === path
 
@@ -154,19 +203,27 @@ export function Sidebar() {
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-1">
               <div className="ml-6 border-l-2 border-border pl-2 space-y-1">
-                {mockHistoryItems.map((item) => (
-                  <Link key={item.id} href="/results" onClick={(e) => e.stopPropagation()}>
-                    <div className="px-2 py-2 hover:bg-accent rounded-md cursor-pointer text-sm">
-                      <p className="font-medium truncate">{item.query}</p>
-                      <p className="text-xs text-muted-foreground">{item.date}</p>
-                    </div>
-                  </Link>
-                ))}
-                <Link href="/history" onClick={(e) => e.stopPropagation()}>
-                  <div className="px-2 py-2 hover:bg-accent rounded-md cursor-pointer text-sm font-medium text-[#25404D] underline">
-                    View all history
+                {historyItems.length > 0 ? (
+                  <>
+                    {historyItems.map((item) => (
+                      <Link key={item.id} href={`/results?id=${item.id}`} onClick={(e) => e.stopPropagation()}>
+                        <div className="px-2 py-2 hover:bg-accent rounded-md cursor-pointer text-sm">
+                          <p className="font-medium truncate">{item.query || "Untitled itinerary"}</p>
+                          <p className="text-xs text-muted-foreground">{formatTimeAgo(item.created_at)}</p>
+                        </div>
+                      </Link>
+                    ))}
+                    <Link href="/history" onClick={(e) => e.stopPropagation()}>
+                      <div className="px-2 py-2 hover:bg-accent rounded-md cursor-pointer text-sm font-medium text-[#25404D] underline">
+                        View all history
+                      </div>
+                    </Link>
+                  </>
+                ) : (
+                  <div className="px-2 py-2 text-sm text-muted-foreground">
+                    No recent searches
                   </div>
-                </Link>
+                )}
               </div>
             </CollapsibleContent>
           </Collapsible>

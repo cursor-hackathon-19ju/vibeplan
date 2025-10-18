@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic'
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { useState, Suspense } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { Sidebar } from "@/components/Sidebar"
 import { MobileNav } from "@/components/MobileNav"
 import { TimelineActivity } from "@/components/TimelineActivity"
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { ArrowLeft, RefreshCw, Map, DollarSign, Clock, MapPin, Tag } from "lucide-react"
+import { createClient } from "@/lib/supabase"
 
 // TypeScript interfaces for the itinerary data
 interface Coordinates {
@@ -27,7 +28,6 @@ interface Activity {
   location: string
   price: string
   discount?: string
-  imageUrl: string
   coordinates: Coordinates
 }
 
@@ -188,27 +188,104 @@ function ResultsContent({ itinerary }: ResultsContentProps) {
 function ResultsPageWrapper() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const [itinerary, setItinerary] = useState<Itinerary | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Get results from URL params
+  // Get params from URL - either direct results or database ID
   const resultsParam = searchParams?.get('results')
+  const idParam = searchParams?.get('id')
 
-  if (!resultsParam) {
-    // If no results, redirect to home
-    router.push('/')
-    return null
+  useEffect(() => {
+    async function loadItinerary() {
+      try {
+        // Priority 1: Load from database by ID
+        if (idParam) {
+          const supabase = createClient()
+          const { data, error: fetchError } = await supabase
+            .from('itineraries')
+            .select('itinerary_data')
+            .eq('id', idParam)
+            .single()
+
+          if (fetchError) {
+            console.error('Error fetching itinerary:', fetchError)
+            setError('Failed to load itinerary')
+            setLoading(false)
+            return
+          }
+
+          if (data && data.itinerary_data) {
+            // Handle case where JSONB might be returned as string or needs parsing
+            try {
+              const itineraryData = typeof data.itinerary_data === 'string' 
+                ? JSON.parse(data.itinerary_data)
+                : data.itinerary_data
+              
+              setItinerary(itineraryData as Itinerary)
+            } catch (parseError) {
+              console.error('Error parsing itinerary data:', parseError)
+              setError('Failed to parse itinerary data')
+            }
+          } else {
+            setError('Itinerary not found')
+          }
+          setLoading(false)
+          return
+        }
+
+        // Priority 2: Load from URL param (backward compatibility)
+        if (resultsParam) {
+          const parsedItinerary: Itinerary = JSON.parse(resultsParam)
+          setItinerary(parsedItinerary)
+          setLoading(false)
+          return
+        }
+
+        // No data available
+        router.push('/')
+      } catch (err) {
+        console.error('Error loading itinerary:', err)
+        setError('Failed to load itinerary')
+        setLoading(false)
+      }
+    }
+
+    loadItinerary()
+  }, [idParam, resultsParam, router])
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen">
+        <Sidebar />
+        <div className="flex-1">
+          <MobileNav />
+          <main className="container max-w-[1600px] mx-auto p-6 md:p-8">
+            <p>Loading results...</p>
+          </main>
+        </div>
+      </div>
+    )
   }
 
-  try {
-    // Parse the itinerary data
-    const itinerary: Itinerary = JSON.parse(resultsParam)
-    
-    return <ResultsContent itinerary={itinerary} />
-  } catch (error) {
-    console.error('Error parsing itinerary data:', error)
-    // Redirect to home on error
-    router.push('/')
-    return null
+  if (error || !itinerary) {
+    return (
+      <div className="flex min-h-screen">
+        <Sidebar />
+        <div className="flex-1">
+          <MobileNav />
+          <main className="container max-w-[1600px] mx-auto p-6 md:p-8">
+            <p className="text-red-500">{error || 'Failed to load itinerary'}</p>
+            <Button onClick={() => router.push('/')} className="mt-4">
+              Go Home
+            </Button>
+          </main>
+        </div>
+      </div>
+    )
   }
+
+  return <ResultsContent itinerary={itinerary} />
 }
 
 export default function ResultsPage() {

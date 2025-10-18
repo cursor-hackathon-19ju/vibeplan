@@ -37,9 +37,13 @@ function LoadingContent() {
 
         const result = await response.json()
         
-        // Navigate to results page with the data
+        // Navigate to results page with the itinerary ID (preferred) or full data (fallback)
         const params = new URLSearchParams()
-        params.set('results', JSON.stringify(result))
+        if (result.itineraryId) {
+          // Use database ID (new approach)
+          params.set('id', result.itineraryId)
+        }
+        
         router.push(`/results?${params.toString()}`)
       } catch (error) {
         console.error('Error generating activities:', error)

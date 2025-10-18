@@ -1,80 +1,131 @@
+"use client"
+
+export const dynamic = 'force-dynamic'
+
 import Link from "next/link"
+import { useEffect, useState } from "react"
 import { Sidebar } from "@/components/Sidebar"
 import { MobileNav } from "@/components/MobileNav"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Clock, Search } from "lucide-react"
-
-// Mock history data - in production, this would come from a database
-const mockHistory = [
-  {
-    id: 1,
-    query: "Plan a date under $50 with food, something artsy, and outdoors.",
-    timestamp: "2 days ago",
-    date: "Oct 16, 2025",
-    filters: {
-      activities: ["Food", "Artsy", "Outdoor"],
-      budget: 1,
-      numPax: "2",
-    },
-    resultsCount: 6,
-  },
-  {
-    id: 2,
-    query: "Family weekend activities",
-    timestamp: "1 week ago",
-    date: "Oct 11, 2025",
-    filters: {
-      activities: ["Outdoor", "Museums"],
-      budget: 2,
-      numPax: "4",
-    },
-    resultsCount: 8,
-  },
-  {
-    id: 3,
-    query: "Artsy cafes and museums",
-    timestamp: "2 weeks ago",
-    date: "Oct 4, 2025",
-    filters: {
-      activities: ["Artsy", "Museums", "Food"],
-      budget: 2,
-      numPax: "2",
-      mbti: "INFP",
-    },
-    resultsCount: 5,
-  },
-  {
-    id: 4,
-    query: "Chill activities for introverts under $30",
-    timestamp: "3 weeks ago",
-    date: "Sep 27, 2025",
-    filters: {
-      activities: ["Museums", "Artsy"],
-      budget: 1,
-      numPax: "1",
-      mbti: "INTJ",
-    },
-    resultsCount: 7,
-  },
-  {
-    id: 5,
-    query: "Weekend brunch spots with good vibes for 4 people",
-    timestamp: "1 month ago",
-    date: "Sep 18, 2025",
-    filters: {
-      activities: ["Food"],
-      budget: 2,
-      numPax: "4",
-    },
-    resultsCount: 10,
-  },
-]
+import { createClient } from "@/lib/supabase"
 
 const budgetLabels = ["Broke Student", "Budget-Friendly", "Moderate", "Comfortable", "Atas Boss"]
 
+interface HistoryItem {
+  id: string
+  query: string
+  created_at: string
+  activities: string[]
+  budget: number
+  num_pax: string
+  mbti?: string
+  spicy?: number
+  itinerary_data: {
+    activities: any[]
+  }
+}
+
+function formatTimeAgo(dateString: string): string {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  const diffWeeks = Math.floor(diffDays / 7)
+  const diffMonths = Math.floor(diffDays / 30)
+
+  if (diffDays === 0) return "Today"
+  if (diffDays === 1) return "Yesterday"
+  if (diffDays < 7) return `${diffDays} days ago`
+  if (diffWeeks === 1) return "1 week ago"
+  if (diffWeeks < 4) return `${diffWeeks} weeks ago`
+  if (diffMonths === 1) return "1 month ago"
+  return `${diffMonths} months ago`
+}
+
+function formatDate(dateString: string): string {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
 export default function HistoryPage() {
+  const [history, setHistory] = useState<HistoryItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchHistory() {
+      try {
+        const supabase = createClient()
+        
+        // Get current user
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        
+        if (userError || !user) {
+          setError('Please log in to view your history')
+          setLoading(false)
+          return
+        }
+
+        // Fetch user's itineraries
+        const { data, error: fetchError } = await supabase
+          .from('itineraries')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+
+        if (fetchError) {
+          console.error('Error fetching history:', fetchError)
+          setError('Failed to load history')
+          setLoading(false)
+          return
+        }
+
+        setHistory(data as HistoryItem[])
+        setLoading(false)
+      } catch (err) {
+        console.error('Error:', err)
+        setError('An unexpected error occurred')
+        setLoading(false)
+      }
+    }
+
+    fetchHistory()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen">
+        <Sidebar />
+        <div className="flex-1">
+          <MobileNav />
+          <main className="container max-w-4xl mx-auto p-6 md:p-8">
+            <p>Loading history...</p>
+          </main>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen">
+        <Sidebar />
+        <div className="flex-1">
+          <MobileNav />
+          <main className="container max-w-4xl mx-auto p-6 md:p-8">
+            <p className="text-red-500">{error}</p>
+            <Button onClick={() => window.location.href = '/login'} className="mt-4">
+              Log In
+            </Button>
+          </main>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />
@@ -93,17 +144,17 @@ export default function HistoryPage() {
           </div>
 
           <div className="flex flex-col gap-4">
-            {mockHistory.map((item) => (
-              <Link key={item.id} href="/results">
+            {history.map((item) => (
+              <Link key={item.id} href={`/results?id=${item.id}`}>
                 <Card className="hover:border-cyan-400 transition-all cursor-pointer">
                   <CardHeader>
                     <div className="flex-1">
                       <CardTitle className="text-lg font-medium font-sans mb-2">
-                        {item.query}
+                        {item.query || "Untitled itinerary"}
                       </CardTitle>
                       <CardDescription className="flex items-center gap-2">
                         <Clock className="h-4 w-4" />
-                        {item.timestamp} • {item.date}
+                        {formatTimeAgo(item.created_at)} • {formatDate(item.created_at)}
                       </CardDescription>
                     </div>
                   </CardHeader>
@@ -111,31 +162,31 @@ export default function HistoryPage() {
                     <div className="space-y-3">
                       {/* Filters Used */}
                       <div className="flex flex-wrap gap-2">
-                        {item.filters.activities.map((activity) => (
+                        {item.activities.map((activity) => (
                           <Badge key={activity} variant="secondary">
                             {activity}
                           </Badge>
                         ))}
-                        {item.filters.budget !== undefined && (
+                        {item.budget !== undefined && (
                           <Badge variant="outline">
-                            {budgetLabels[item.filters.budget]}
+                            {budgetLabels[item.budget]}
                           </Badge>
                         )}
-                        {item.filters.numPax && (
+                        {item.num_pax && (
                           <Badge variant="outline">
-                            {item.filters.numPax} pax
+                            {item.num_pax} pax
                           </Badge>
                         )}
-                        {item.filters.mbti && (
+                        {item.mbti && (
                           <Badge variant="outline">
-                            {item.filters.mbti}
+                            {item.mbti}
                           </Badge>
                         )}
                       </div>
 
                       {/* Results Count */}
                       <p className="text-sm text-muted-foreground">
-                        Found {item.resultsCount} activities
+                        Found {item.itinerary_data?.activities?.length || 0} activities
                       </p>
                     </div>
                   </CardContent>
@@ -143,7 +194,7 @@ export default function HistoryPage() {
               </Link>
             ))}
 
-            {mockHistory.length === 0 && (
+            {history.length === 0 && (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-16">
                   <Search className="h-16 w-16 text-muted-foreground mb-4" />

@@ -9,7 +9,6 @@ interface TimelineActivity {
   description: string
   location: string
   price?: string
-  imageUrl?: string
   tags?: string[]
   discount?: string
   coordinates?: {
@@ -80,19 +79,6 @@ export function TimelineActivity({ activity, isLast = false }: TimelineActivityP
               </Badge>
             ))}
           </div>
-        )}
-        
-        {/* Image */}
-        {activity.imageUrl && (
-          <Card className="overflow-hidden">
-            <div className="aspect-video w-full overflow-hidden bg-muted">
-              <img
-                src={activity.imageUrl}
-                alt={activity.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </Card>
         )}
       </div>
     </div>
