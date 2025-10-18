@@ -82,3 +82,26 @@
   animation: pulse-border 4s ease-in-out infinite;
 }
 
+@keyframes thinking-step {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  90% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+.animate-thinking-step {
+  animation: thinking-step 4s ease-in-out infinite;
+}
+
