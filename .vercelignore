@@ -1,0 +1,30 @@
+# Exclude data ingestion scripts and tools from Vercel deployment
+data-ingestion/
+data-ingestion/**
+
+# Exclude test files
+test-*.ts
+test_*.py
+*.ipynb
+
+# Exclude Python-specific files (not needed for Next.js deployment)
+chromadb_api.py
+requirements.txt
+
+# Exclude Python cache and databases
+__pycache__/
+**/__pycache__/
+*.pyc
+*.db
+*.sqlite
+*.sqlite3
+
+# Exclude documentation (optional - uncomment if you don't want to deploy docs)
+# DEPLOYMENT.md
+# IMPLEMENTATION_SUMMARY.md
+# PROJECT_COMPLETE.md
+# QUICKSTART.md
+
+# Exclude git files
+.git/
+.gitignore
