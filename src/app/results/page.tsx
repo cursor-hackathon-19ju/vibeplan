@@ -7,6 +7,7 @@ import { useState, Suspense } from "react"
 import { Sidebar } from "@/components/Sidebar"
 import { MobileNav } from "@/components/MobileNav"
 import { TimelineActivity } from "@/components/TimelineActivity"
+import { ItineraryMap } from "@/components/ItineraryMap"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -28,64 +29,94 @@ const mockItinerary = {
       id: 1,
       time: "8:00 AM - 9:00 AM",
       title: "Breakfast at Yakun Kaya Toast",
-      description: "As the city stirs awake, stroll into Yakun Kaya Toast at VivoCity for the quintessential Singapore breakfast. For just $7.20 with your AI pass, enjoy a 10% discount on a set of soft-boiled eggs, thick kaya toast, and freshly brewed kopi. The chatter of commuters, the clinking of cups, and the faint scent of toasted bread mark the perfect start to your island day before you cross the bridge into Sentosa.",
+      description: (
+        <>
+          As the city stirs awake, stroll into <strong>Yakun Kaya Toast at VivoCity</strong> for the quintessential Singapore breakfast. For just <strong>$7.20</strong> with your AI pass, enjoy a <strong>10% discount</strong> on a set of soft-boiled eggs, thick kaya toast, and freshly brewed kopi. The chatter of commuters, the clinking of cups, and the faint scent of toasted bread mark the perfect start to your island day before you cross the bridge into Sentosa.
+        </>
+      ),
       location: "VivoCity, HarbourFront",
       price: "$7.20",
       discount: "10% off",
       imageUrl: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=80",
-      tags: ["Breakfast", "Local", "Café"]
+      tags: ["Breakfast", "Local", "Café"],
+      coordinates: { lat: 1.2644, lng: 103.8220 }
     },
     {
       id: 2,
       time: "9:30 AM - 11:30 AM",
       title: "Beach Walk & Swim at Siloso Beach",
-      description: "Cross the Sentosa Boardwalk and head straight to Siloso Beach. Feel the soft sand between your toes and dive into the gentle waves. The morning sun isn't too harsh yet, making it perfect for a refreshing swim. Grab a coconut from a nearby vendor ($4) and relax under a palm tree, watching kayakers glide across the turquoise waters.",
+      description: (
+        <>
+          Cross the <strong>Sentosa Boardwalk</strong> and head straight to <strong>Siloso Beach</strong>. Feel the soft sand between your toes and dive into the gentle waves. The morning sun isn't too harsh yet, making it perfect for a refreshing swim. Grab a coconut from a nearby vendor <strong>($4)</strong> and relax under a palm tree, watching kayakers glide across the turquoise waters.
+        </>
+      ),
       location: "Siloso Beach, Sentosa",
       price: "Free (Coconut: $4)",
       imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",
-      tags: ["Beach", "Nature", "Free Activity"]
+      tags: ["Beach", "Nature", "Free Activity"],
+      coordinates: { lat: 1.2471, lng: 103.8096 }
     },
     {
       id: 3,
       time: "12:00 PM - 1:30 PM",
       title: "Lunch at Coastes Beachside Café",
-      description: "Settle into Coastes, where the sea breeze meets comfort food. Order the signature fish and chips ($18.50) or a hearty burger while watching the beach volleyball matches. With your AI discount, you'll save another 10% and get a complimentary iced lemon tea. The laid-back vibe and ocean view make this the perfect midday pause.",
+      description: (
+        <>
+          Settle into <strong>Coastes</strong>, where the sea breeze meets comfort food. Order the signature fish and chips <strong>($18.50)</strong> or a hearty burger while watching the beach volleyball matches. With your AI discount, you'll save another <strong>10%</strong> and get a complimentary iced lemon tea. The laid-back vibe and ocean view make this the perfect midday pause.
+        </>
+      ),
       location: "Siloso Beach, Sentosa",
       price: "$18.50",
       discount: "10% off + Free drink",
       imageUrl: "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&q=80",
-      tags: ["Lunch", "Beachfront", "Western"]
+      tags: ["Lunch", "Beachfront", "Western"],
+      coordinates: { lat: 1.2475, lng: 103.8090 }
     },
     {
       id: 4,
       time: "2:00 PM - 4:00 PM",
       title: "MegaZip Adventure & Skyline Luge",
-      description: "Time for adrenaline! Soar 450 meters across the jungle canopy on the MegaZip zipline, ending with a splash landing on Siloso Beach. Then, race down Skyline Luge Sentosa's winding tracks with panoramic views of the South China Sea. The combo ticket, usually $65, is yours for $55 with the AI attraction rebate.",
+      description: (
+        <>
+          Time for adrenaline! Soar <strong>450 meters</strong> across the jungle canopy on the <strong>MegaZip zipline</strong>, ending with a splash landing on Siloso Beach. Then, race down <strong>Skyline Luge Sentosa's</strong> winding tracks with panoramic views of the South China Sea. The combo ticket, usually <strong>$65</strong>, is yours for <strong>$55</strong> with the <strong>AI attraction rebate</strong>.
+        </>
+      ),
       location: "Imbiah Lookout, Sentosa",
       price: "$55",
       discount: "$10 rebate",
       imageUrl: "https://images.unsplash.com/photo-1624286763166-c0e36ce59daf?w=800&q=80",
-      tags: ["Adventure", "Thrills", "Outdoor"]
+      tags: ["Adventure", "Thrills", "Outdoor"],
+      coordinates: { lat: 1.2494, lng: 103.8182 }
     },
     {
       id: 5,
       time: "6:00 PM - 7:30 PM",
       title: "Sunset at Fort Siloso Skywalk",
-      description: "Wind down your adventure at the Fort Siloso Skywalk, a glass-bottom walkway 11 stories high. Watch the sun dip into the horizon, painting the sky in shades of amber and rose. Entry is just $5, and the views of the harbor, container ships, and neighboring islands are nothing short of spectacular.",
+      description: (
+        <>
+          Wind down your adventure at the <strong>Fort Siloso Skywalk</strong>, a glass-bottom walkway <strong>11 stories high</strong>. Watch the sun dip into the horizon, painting the sky in shades of amber and rose. Entry is just <strong>$5</strong>, and the views of the harbor, container ships, and neighboring islands are nothing short of spectacular.
+        </>
+      ),
       location: "Fort Siloso, Sentosa",
       price: "$5",
       imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
-      tags: ["Sunset", "Views", "Photography"]
+      tags: ["Sunset", "Views", "Photography"],
+      coordinates: { lat: 1.2493, lng: 103.8069 }
     },
     {
       id: 6,
       time: "8:00 PM - 9:30 PM",
       title: "Dinner & Wings of Time Show",
-      description: "Cap off the night with dinner at one of Sentosa's beachfront restaurants before catching the Wings of Time show at 8:40 PM. This open-air pyrotechnic and water show blends fire, lasers, and storytelling against the ocean backdrop. Best of all? It's free to watch from the beach, making it the perfect finale to your island escape.",
+      description: (
+        <>
+          Cap off the night with dinner at one of <strong>Sentosa's beachfront restaurants</strong> before catching the <strong>Wings of Time show at 8:40 PM</strong>. This open-air pyrotechnic and water show blends fire, lasers, and storytelling against the ocean backdrop. Best of all? It's <strong>free to watch</strong> from the beach, making it the perfect finale to your island escape.
+        </>
+      ),
       location: "Beach Station, Sentosa",
       price: "Free (Dinner est. $25)",
       imageUrl: "https://images.unsplash.com/photo-1533929736458-ca588d08c8be?w=800&q=80",
-      tags: ["Dinner", "Show", "Nightlife"]
+      tags: ["Dinner", "Show", "Nightlife"],
+      coordinates: { lat: 1.2500, lng: 103.8140 }
     }
   ]
 }
@@ -101,9 +132,9 @@ function ResultsContent() {
       <div className="flex-1">
         <MobileNav />
         
-        <main className="container max-w-7xl mx-auto p-6 md:p-8">
+        <main className="container max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
           {/* Header */}
-          <div className="mb-8 flex items-center gap-4">
+          <div className="mb-6 md:mb-8 flex items-center gap-3 md:gap-4">
             <Button
               variant="ghost"
               size="icon"
@@ -125,14 +156,11 @@ function ResultsContent() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="bottom" className="h-[80vh]">
-                <div className="h-full flex items-center justify-center bg-muted rounded-lg">
-                  <div className="text-center space-y-2">
-                    <Map className="h-12 w-12 mx-auto text-muted-foreground" />
-                    <h3 className="text-lg font-semibold">Map View</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Interactive map coming soon
-                    </p>
-                  </div>
+                <div className="h-full">
+                  <ItineraryMap 
+                    activities={mockItinerary.activities}
+                    apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
+                  />
                 </div>
               </SheetContent>
             </Sheet>
@@ -143,13 +171,13 @@ function ResultsContent() {
             {/* Left Section - Itinerary */}
             <div>
               {/* Title */}
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif italic mb-6">
+              <h1 className="text-2xl md:text-4xl lg:text-5xl font-serif italic mb-4 md:mb-6">
                 {mockItinerary.title}
               </h1>
               
               {/* Summary */}
-              <Card className="mb-8">
-                <CardContent className="pt-6 space-y-4">
+              <Card className="mb-6 md:mb-8">
+                <CardContent className="pt-4 md:pt-6 space-y-3 md:space-y-4">
                   <p className="text-base leading-relaxed">
                     {mockItinerary.summary.intro}
                   </p>
@@ -177,7 +205,7 @@ function ResultsContent() {
                     <div className="flex items-start gap-3">
                       <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="font-semibold">Area Covered</p>
+                        <p className="font-semibold">Locations</p>
                         <p className="text-muted-foreground">{mockItinerary.summary.area}</p>
                       </div>
                     </div>
@@ -195,7 +223,7 @@ function ResultsContent() {
               
               {/* Timeline */}
               <div className="space-y-0">
-                <h2 className="text-2xl font-semibold mb-6">Your Day Timeline</h2>
+                <h2 className="text-xl md:text-2xl font-semibold mb-4 md:mb-6">Your Day Timeline</h2>
                 {mockItinerary.activities.map((activity, index) => (
                   <TimelineActivity
                     key={activity.id}
@@ -211,17 +239,11 @@ function ResultsContent() {
               <div className="sticky top-8">
                 <Card className="overflow-hidden">
                   <CardContent className="p-0">
-                    <div className="h-[calc(100vh-8rem)] min-h-[600px] flex items-center justify-center bg-muted">
-                      <div className="text-center space-y-3 p-6">
-                        <Map className="h-16 w-16 mx-auto text-muted-foreground" />
-                        <h3 className="text-xl font-semibold">Map View</h3>
-                        <p className="text-sm text-muted-foreground max-w-xs">
-                          Interactive map showing all activity locations will appear here
-                        </p>
-                        <p className="text-xs text-muted-foreground italic">
-                          Coming Soon
-                        </p>
-                      </div>
+                    <div className="h-[calc(100vh-8rem)] min-h-[600px]">
+                      <ItineraryMap 
+                        activities={mockItinerary.activities}
+                        apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
+                      />
                     </div>
                   </CardContent>
                 </Card>

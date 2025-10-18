@@ -6,7 +6,7 @@ interface TimelineActivity {
   id: number
   time: string
   title: string
-  description: string
+  description: string | React.ReactNode
   location: string
   price?: string
   imageUrl?: string
