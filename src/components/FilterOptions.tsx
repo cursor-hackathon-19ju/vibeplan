@@ -62,6 +62,20 @@ const getBudgetCategory = (percentage: number): number => {
     return 4 // Atas Boss
 }
 
+// Map pax option to numeric value or string range
+const getPaxValue = (paxOption: string): string | number => {
+    switch (paxOption) {
+        case "solo":
+            return 1
+        case "date":
+            return 2
+        case "double-date":
+            return 4
+        default:
+            return paxOption // Keep string ranges like "3-5", "6-7", "8+"
+    }
+}
+
 export function FilterOptions() {
     const router = useRouter()
     const [selectedActivities, setSelectedActivities] = useState<string[]>([])
@@ -89,10 +103,10 @@ export function FilterOptions() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        // Store search params with budget mapped to category
+        // Store search params with budget and numPax mapped to correct values
         const searchParams = {
             activities: selectedActivities,
-            numPax,
+            numPax: numPax ? getPaxValue(numPax) : undefined,
             budget: getBudgetCategory(budget[0]),
             mbti,
             spicy,

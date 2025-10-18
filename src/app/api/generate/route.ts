@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import Exa from "exa-js";
 
 // TODO: Replace this with actual AI/LLM integration and database queries
 // This is a placeholder that returns mock itinerary data
 
 export async function POST(request: NextRequest) {
-  
+
   try {
     const body = await request.json()
-    
+
     // Log the search parameters for debugging
     console.log('Search parameters received:', body)
 
@@ -27,6 +28,55 @@ export async function POST(request: NextRequest) {
     // - body.spicy (nightlife preference)
     // - body.query (user's search query)
     // - body.startDate and body.endDate (date range)
+
+    // Fetch results from Exa
+    const exa = new Exa(process.env.EXA_API_KEY);
+    const refined_query = `I want to plan an activity that includes ${body.activities.length > 0 ? body.activities.join(', ') : 'a mix of activities'}, for a total of ${body.numPax || 'a few'} people. The budget is ${body.budget} on a scale of 0–4 (where 0 = <$30 and 4 = $100+). This plan is tailored for individuals with the MBTI type ${body.mbti || 'any type'}. ${body.spicy ? 'It should also include drinks and nightlife.' : ''} The main preference or goal is: "${body.query}".`
+    
+    // Calculate date range: 30 days ago to today
+    const endDate = new Date()
+    const startDate = new Date()
+    startDate.setDate(startDate.getDate() - 30)
+    
+    const exa_result = await exa.searchAndContents(
+      `${refined_query}`,
+      {
+        type: "auto",
+        userLocation: "SG",
+        numResults: 5,
+        startPublishedDate: startDate.toISOString(),
+        endPublishedDate: endDate.toISOString(),
+        summary: {
+          schema: {
+            description: "Schema for activity information including title, description, and tags",
+            type: "object",
+            properties: {
+              title: {
+                type: "string",
+                description: "Activity title in format: [Meal/Activity Type] at [Venue Name]"
+              },
+              description: {
+                type: "string",
+                description: "2-3 engaging sentences about the experience that start with an action verb, describe the ambiance, mention deals naturally, and feel like a friend's recommendation"
+              },
+              tags: {
+                type: "array",
+                description: "3-5 relevant tags categorizing the activity",
+                items: {
+                  type: "string",
+                  description: "Tag related to meal time, vibe, activity type, cuisine, or occasion"
+                }
+              }
+            },
+            required: ["title", "description", "tags"],
+            additionalProperties: false
+          }
+        }
+      }
+    );
+
+    const summaries = exa_result.results.map(r => JSON.parse(r.summary));
+    console.log("EXA RESULTS RECEIVED: ", JSON.stringify(summaries, null, 2))
 
     // Simulate AI processing delay
     await new Promise(resolve => setTimeout(resolve, 500))
@@ -142,10 +192,10 @@ export async function POST(request: NextRequest) {
 
     // Save to Supabase database
     const supabase = await createServerSupabaseClient()
-    
+
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser()
-    
+
     if (userError || !user) {
       console.error('Error getting user:', userError)
       return NextResponse.json(
@@ -164,7 +214,7 @@ export async function POST(request: NextRequest) {
         budget: body.budget || 0,
         num_pax: body.numPax || '1',
         mbti: body.mbti || null,
-        spicy: body.spicy || null,
+        spicy: body.spicy === true,
         start_date: body.startDate || null,
         end_date: body.endDate || null,
         itinerary_data: itineraryData
