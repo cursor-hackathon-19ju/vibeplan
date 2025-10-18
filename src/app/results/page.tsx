@@ -73,31 +73,32 @@ function ResultsContent({ itinerary, itineraryId, isOwner = false, isPublic = fa
       <div className="flex-1">
         <MobileNav />
         
-        <main className="container max-w-[1600px] mx-auto p-6 md:p-8">
+        <main className="container max-w-[1600px] mx-auto p-4 sm:p-6 md:p-8">
            {/* Header */}
-           <div className="mb-8 flex items-center gap-4">
+           <div className="mb-6 md:mb-8 flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
              <Button
                variant="ghost"
                size="icon"
                onClick={() => router.push('/history')}
+               className="flex-shrink-0"
              >
                <ArrowLeft className="h-5 w-5" />
              </Button>
-             <Button onClick={() => router.push('/')} variant="outline">
-               <RefreshCw className="h-4 w-4 mr-2" />
-               Refine Search
+             <Button onClick={() => router.push('/')} variant="outline" className="flex-shrink-0">
+               <RefreshCw className="h-4 w-4 sm:mr-2" />
+               <span className="hidden sm:inline">Refine Search</span>
              </Button>
-            
+
             {/* Share Toggle - Only visible to owner */}
             {isOwner && (
-              <div className="flex items-center gap-3 px-4 py-2 border rounded-lg">
-                <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 border rounded-lg flex-shrink-0">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   {publicState ? (
                     <Share2 className="h-4 w-4 text-primary" />
                   ) : (
                     <Lock className="h-4 w-4 text-muted-foreground" />
                   )}
-                  <span className="text-sm font-medium w-[50px]">
+                  <span className="text-xs sm:text-sm font-medium min-w-[46px] sm:min-w-[50px]">
                     {publicState ? "Public" : "Private"}
                   </span>
                 </div>
@@ -117,28 +118,28 @@ function ResultsContent({ itinerary, itineraryId, isOwner = false, isPublic = fa
                 />
               </div>
             )}
-            
+
             {/* Visitor view-only indicator */}
             {!isOwner && (
-              <Badge variant="outline" className="flex items-center gap-1 px-3 py-1">
+              <Badge variant="outline" className="flex items-center gap-1 px-2 sm:px-3 py-1 flex-shrink-0">
                 <Eye className="h-3 w-3 text-muted-foreground" />
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   View Only
                 </span>
               </Badge>
             )}
-            
+
             {/* Mobile Map Toggle */}
             <Sheet open={mapOpen} onOpenChange={setMapOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" className="ml-auto lg:hidden">
-                  <Map className="h-4 w-4 mr-2" />
-                  View Map
+                <Button variant="outline" className="ml-auto lg:hidden flex-shrink-0">
+                  <Map className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">View Map</span>
                 </Button>
               </SheetTrigger>
               <SheetContent side="bottom" className="h-[80vh]">
                 <div className="h-full">
-                  <ItineraryMap 
+                  <ItineraryMap
                     activities={itinerary.activities}
                     apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
                   />
@@ -148,63 +149,63 @@ function ResultsContent({ itinerary, itineraryId, isOwner = false, isPublic = fa
           </div>
 
           {/* Two Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_minmax(450px,45%)] gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_minmax(450px,45%)] gap-6 md:gap-8">
             {/* Left Section - Itinerary */}
             <div>
               {/* Title */}
-              <h1 className="text-2xl md:text-4xl lg:text-5xl font-serif italic mb-4 md:mb-6">
+              <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-serif italic mb-3 sm:mb-4 md:mb-6 leading-tight">
                 {itinerary.title}
               </h1>
-              
+
               {/* Summary */}
               <Card className="mb-6 md:mb-8">
-                <CardContent className="pt-4 md:pt-6 space-y-3 md:space-y-4">
-                  <p className="text-base leading-relaxed">
+                <CardContent className="pt-4 sm:pt-5 md:pt-6 space-y-3 md:space-y-4 text-sm sm:text-base">
+                  <p className="leading-relaxed">
                     {itinerary.summary.intro}
                   </p>
-                  <p className="text-base leading-relaxed">
+                  <p className="leading-relaxed">
                     {itinerary.summary.description}
                   </p>
-                  
-                  <div className="border-t pt-4 space-y-3">
-                    <div className="flex items-start gap-3">
-                      <DollarSign className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-semibold">Total Estimated Budget (After Deals)</p>
-                        <p className="text-muted-foreground">{itinerary.summary.budget}</p>
+
+                  <div className="border-t pt-3 sm:pt-4 space-y-3">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-sm sm:text-base">Total Estimated Budget (After Deals)</p>
+                        <p className="text-muted-foreground text-sm sm:text-base break-words">{itinerary.summary.budget}</p>
                       </div>
                     </div>
-                    
-                    <div className="flex items-start gap-3">
-                      <Clock className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-semibold">Duration</p>
-                        <p className="text-muted-foreground">{itinerary.summary.duration}</p>
+
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-sm sm:text-base">Duration</p>
+                        <p className="text-muted-foreground text-sm sm:text-base">{itinerary.summary.duration}</p>
                       </div>
                     </div>
-                    
-                    <div className="flex items-start gap-3">
-                      <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-semibold">Locations</p>
-                        <p className="text-muted-foreground">{itinerary.summary.area}</p>
+
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-sm sm:text-base">Locations</p>
+                        <p className="text-muted-foreground text-sm sm:text-base break-words">{itinerary.summary.area}</p>
                       </div>
                     </div>
-                    
-                    <div className="flex items-start gap-3">
-                      <Tag className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-semibold">Included Perks</p>
-                        <p className="text-muted-foreground">{itinerary.summary.perks}</p>
+
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <Tag className="h-4 w-4 sm:h-5 sm:w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-sm sm:text-base">Included Perks</p>
+                        <p className="text-muted-foreground text-sm sm:text-base break-words">{itinerary.summary.perks}</p>
                       </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-              
+
               {/* Timeline */}
               <div className="space-y-0">
-                <h2 className="text-xl md:text-2xl font-semibold mb-4 md:mb-6">Your Day Timeline</h2>
+                <h2 className="text-lg sm:text-xl md:text-2xl font-semibold mb-4 md:mb-6">Your Day Timeline</h2>
                 {itinerary.activities.map((activity, index) => (
                   <TimelineActivity
                     key={activity.id}
@@ -346,8 +347,8 @@ function ResultsPageWrapper() {
         <Sidebar />
         <div className="flex-1">
           <MobileNav />
-          <main className="container max-w-[1600px] mx-auto p-6 md:p-8">
-            <p>Loading results...</p>
+          <main className="container max-w-[1600px] mx-auto p-4 sm:p-6 md:p-8">
+            <p className="text-sm sm:text-base">Loading results...</p>
           </main>
         </div>
       </div>
@@ -360,8 +361,8 @@ function ResultsPageWrapper() {
         <Sidebar />
         <div className="flex-1">
           <MobileNav />
-          <main className="container max-w-[1600px] mx-auto p-6 md:p-8">
-            <p className="text-red-500">{error || 'Failed to load itinerary'}</p>
+          <main className="container max-w-[1600px] mx-auto p-4 sm:p-6 md:p-8">
+            <p className="text-red-500 text-sm sm:text-base mb-4">{error || 'Failed to load itinerary'}</p>
             <Button onClick={() => router.push('/')} className="mt-4">
               Go Home
             </Button>
@@ -389,8 +390,8 @@ export default function ResultsPage() {
         <Sidebar />
         <div className="flex-1">
           <MobileNav />
-          <main className="container max-w-[1600px] mx-auto p-6 md:p-8">
-            <p>Loading results...</p>
+          <main className="container max-w-[1600px] mx-auto p-4 sm:p-6 md:p-8">
+            <p className="text-sm sm:text-base">Loading results...</p>
           </main>
         </div>
       </div>
