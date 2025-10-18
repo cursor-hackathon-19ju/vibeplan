@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
         budget: body.budget || 0,
         num_pax: body.numPax || '1',
         mbti: body.mbti || null,
-        spicy: body.spicy || null,
+        spicy: body.spicy === true,
         start_date: body.startDate || null,
         end_date: body.endDate || null,
         itinerary_data: itineraryData

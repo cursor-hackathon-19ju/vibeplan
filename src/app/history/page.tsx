@@ -22,7 +22,7 @@ interface HistoryItem {
   budget: number
   num_pax: string
   mbti?: string
-  spicy?: number
+  spicy?: boolean
   itinerary_data: {
     activities: any[]
   }

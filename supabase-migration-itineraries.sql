@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS public.itineraries (
   budget INTEGER NOT NULL CHECK (budget >= 0 AND budget <= 4),
   num_pax TEXT NOT NULL,
   mbti TEXT,
-  spicy INTEGER CHECK (spicy IS NULL OR (spicy >= 0 AND spicy <= 4)),
+  spicy BOOLEAN DEFAULT false,
   start_date TEXT,
   end_date TEXT,
   
@@ -58,5 +58,5 @@ COMMENT ON TABLE public.itineraries IS 'Stores user-generated itineraries with s
 -- Add comments to columns
 COMMENT ON COLUMN public.itineraries.itinerary_data IS 'Complete itinerary object containing title, summary, and activities array';
 COMMENT ON COLUMN public.itineraries.budget IS 'Budget level: 0=Broke Student, 1=Budget-Friendly, 2=Moderate, 3=Comfortable, 4=Atas Boss';
-COMMENT ON COLUMN public.itineraries.spicy IS 'Nightlife preference level: 0-4';
+COMMENT ON COLUMN public.itineraries.spicy IS 'Include drinks & nightlife: true/false';
 
