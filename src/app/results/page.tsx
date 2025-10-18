@@ -1,93 +1,116 @@
-"use client"
+"use client";
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
-import { useRouter, useSearchParams } from "next/navigation"
-import { useState, useEffect, Suspense, useCallback } from "react"
-import { Sidebar } from "@/components/Sidebar"
-import { MobileNav } from "@/components/MobileNav"
-import { TimelineActivity } from "@/components/TimelineActivity"
-import { ItineraryMap } from "@/components/ItineraryMap"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { ArrowLeft, RefreshCw, Map, DollarSign, Clock, MapPin, Tag, Share2, Lock, Eye } from "lucide-react"
-import { createClient } from "@/lib/supabase"
-import { Switch } from "@/components/ui/switch"
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, Suspense, useCallback } from "react";
+import { Sidebar } from "@/components/Sidebar";
+import { MobileNav } from "@/components/MobileNav";
+import { TimelineActivity } from "@/components/TimelineActivity";
+import { ItineraryMap } from "@/components/ItineraryMap";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  ArrowLeft,
+  RefreshCw,
+  Map,
+  DollarSign,
+  Clock,
+  MapPin,
+  Tag,
+  Share2,
+  Lock,
+  Eye,
+  Loader2,
+} from "lucide-react";
+import { createClient } from "@/lib/supabase";
+import { Switch } from "@/components/ui/switch";
 
 // TypeScript interfaces for the itinerary data
 interface Coordinates {
-  lat: number
-  lng: number
+  lat: number;
+  lng: number;
 }
 
 interface Activity {
-  id: number
-  time: string
-  title: string
-  description: string
-  location: string
-  price: string
-  discount?: string
-  coordinates: Coordinates
+  id: number;
+  time: string;
+  title: string;
+  description: string;
+  location: string;
+  price: string;
+  discount?: string;
+  coordinates: Coordinates;
 }
 
 interface ItinerarySummary {
-  intro: string
-  description: string
-  budget: string
-  duration: string
-  area: string
-  perks: string
+  intro: string;
+  description: string;
+  budget: string;
+  duration: string;
+  area: string;
+  perks: string;
 }
 
 interface Itinerary {
-  title: string
-  summary: ItinerarySummary
-  activities: Activity[]
+  title: string;
+  summary: ItinerarySummary;
+  activities: Activity[];
 }
 
 interface ResultsContentProps {
-  itinerary: Itinerary
-  itineraryId?: string
-  isOwner?: boolean
-  isPublic?: boolean
-  onTogglePublic?: (nextPublic: boolean) => Promise<void>
+  itinerary: Itinerary;
+  itineraryId?: string;
+  isOwner?: boolean;
+  isPublic?: boolean;
+  onTogglePublic?: (nextPublic: boolean) => Promise<void>;
 }
 
-function ResultsContent({ itinerary, itineraryId, isOwner = false, isPublic = false, onTogglePublic }: ResultsContentProps) {
-  const router = useRouter()
-  const [mapOpen, setMapOpen] = useState(false)
-  const [publicState, setPublicState] = useState(isPublic)
+function ResultsContent({
+  itinerary,
+  itineraryId,
+  isOwner = false,
+  isPublic = false,
+  onTogglePublic,
+}: ResultsContentProps) {
+  const router = useRouter();
+  const [mapOpen, setMapOpen] = useState(false);
+  const [publicState, setPublicState] = useState(isPublic);
 
   // Sync publicState with prop changes
   useEffect(() => {
-    setPublicState(isPublic)
-  }, [isPublic])
+    setPublicState(isPublic);
+  }, [isPublic]);
 
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      
+
       <div className="flex-1">
         <MobileNav />
-        
+
         <main className="container max-w-[1600px] mx-auto p-4 sm:p-6 md:p-8">
-           {/* Header */}
-           <div className="mb-6 md:mb-8 flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
-             <Button
-               variant="ghost"
-               size="icon"
-               onClick={() => router.push('/history')}
-               className="flex-shrink-0"
-             >
-               <ArrowLeft className="h-5 w-5" />
-             </Button>
-             <Button onClick={() => router.push('/')} variant="outline" className="flex-shrink-0">
-               <RefreshCw className="h-4 w-4 sm:mr-2" />
-               <span className="hidden sm:inline">Refine Search</span>
-             </Button>
+          {/* Header */}
+          <div className="mb-6 md:mb-8 flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.push("/history")}
+              className="flex-shrink-0"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <Button
+              onClick={() => router.push("/")}
+              variant="outline"
+              className="flex-shrink-0"
+            >
+              <RefreshCw className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Refine Search</span>
+            </Button>
 
             {/* Share Toggle - Only visible to owner */}
             {isOwner && (
@@ -105,14 +128,17 @@ function ResultsContent({ itinerary, itineraryId, isOwner = false, isPublic = fa
                 <Switch
                   checked={publicState}
                   onCheckedChange={async (checked) => {
-                    setPublicState(checked)
-                    if (!onTogglePublic) return
+                    setPublicState(checked);
+                    if (!onTogglePublic) return;
 
                     try {
-                      await onTogglePublic(checked)
+                      await onTogglePublic(checked);
                     } catch (toggleError) {
-                      console.error("Failed to update public status:", toggleError)
-                      setPublicState(!checked)
+                      console.error(
+                        "Failed to update public status:",
+                        toggleError
+                      );
+                      setPublicState(!checked);
                     }
                   }}
                 />
@@ -121,7 +147,10 @@ function ResultsContent({ itinerary, itineraryId, isOwner = false, isPublic = fa
 
             {/* Visitor view-only indicator */}
             {!isOwner && (
-              <Badge variant="outline" className="flex items-center gap-1 px-2 sm:px-3 py-1 flex-shrink-0">
+              <Badge
+                variant="outline"
+                className="flex items-center gap-1 px-2 sm:px-3 py-1 flex-shrink-0"
+              >
                 <Eye className="h-3 w-3 text-muted-foreground" />
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   View Only
@@ -132,7 +161,10 @@ function ResultsContent({ itinerary, itineraryId, isOwner = false, isPublic = fa
             {/* Mobile Map Toggle */}
             <Sheet open={mapOpen} onOpenChange={setMapOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" className="ml-auto lg:hidden flex-shrink-0">
+                <Button
+                  variant="outline"
+                  className="ml-auto lg:hidden flex-shrink-0"
+                >
                   <Map className="h-4 w-4 sm:mr-2" />
                   <span className="hidden sm:inline">View Map</span>
                 </Button>
@@ -141,7 +173,7 @@ function ResultsContent({ itinerary, itineraryId, isOwner = false, isPublic = fa
                 <div className="h-full">
                   <ItineraryMap
                     activities={itinerary.activities}
-                    apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
+                    apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""}
                   />
                 </div>
               </SheetContent>
@@ -160,9 +192,7 @@ function ResultsContent({ itinerary, itineraryId, isOwner = false, isPublic = fa
               {/* Summary */}
               <Card className="mb-6 md:mb-8">
                 <CardContent className="pt-4 sm:pt-5 md:pt-6 space-y-3 md:space-y-4 text-sm sm:text-base">
-                  <p className="leading-relaxed">
-                    {itinerary.summary.intro}
-                  </p>
+                  <p className="leading-relaxed">{itinerary.summary.intro}</p>
                   <p className="leading-relaxed">
                     {itinerary.summary.description}
                   </p>
@@ -171,32 +201,48 @@ function ResultsContent({ itinerary, itineraryId, isOwner = false, isPublic = fa
                     <div className="flex items-start gap-2 sm:gap-3">
                       <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-primary mt-0.5 flex-shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-sm sm:text-base">Total Estimated Budget (After Deals)</p>
-                        <p className="text-muted-foreground text-sm sm:text-base break-words">{itinerary.summary.budget}</p>
+                        <p className="font-semibold text-sm sm:text-base">
+                          Total Estimated Budget (After Deals)
+                        </p>
+                        <p className="text-muted-foreground text-sm sm:text-base break-words">
+                          {itinerary.summary.budget}
+                        </p>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-2 sm:gap-3">
                       <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary mt-0.5 flex-shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-sm sm:text-base">Duration</p>
-                        <p className="text-muted-foreground text-sm sm:text-base">{itinerary.summary.duration}</p>
+                        <p className="font-semibold text-sm sm:text-base">
+                          Duration
+                        </p>
+                        <p className="text-muted-foreground text-sm sm:text-base">
+                          {itinerary.summary.duration}
+                        </p>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-2 sm:gap-3">
                       <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-primary mt-0.5 flex-shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-sm sm:text-base">Locations</p>
-                        <p className="text-muted-foreground text-sm sm:text-base break-words">{itinerary.summary.area}</p>
+                        <p className="font-semibold text-sm sm:text-base">
+                          Locations
+                        </p>
+                        <p className="text-muted-foreground text-sm sm:text-base break-words">
+                          {itinerary.summary.area}
+                        </p>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-2 sm:gap-3">
                       <Tag className="h-4 w-4 sm:h-5 sm:w-5 text-primary mt-0.5 flex-shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-sm sm:text-base">Included Perks</p>
-                        <p className="text-muted-foreground text-sm sm:text-base break-words">{itinerary.summary.perks}</p>
+                        <p className="font-semibold text-sm sm:text-base">
+                          Included Perks
+                        </p>
+                        <p className="text-muted-foreground text-sm sm:text-base break-words">
+                          {itinerary.summary.perks}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -205,7 +251,9 @@ function ResultsContent({ itinerary, itineraryId, isOwner = false, isPublic = fa
 
               {/* Timeline */}
               <div className="space-y-0">
-                <h2 className="text-lg sm:text-xl md:text-2xl font-semibold mb-4 md:mb-6">Your Day Timeline</h2>
+                <h2 className="text-lg sm:text-xl md:text-2xl font-semibold mb-4 md:mb-6">
+                  Your Day Timeline
+                </h2>
                 {itinerary.activities.map((activity, index) => (
                   <TimelineActivity
                     key={activity.id}
@@ -215,16 +263,18 @@ function ResultsContent({ itinerary, itineraryId, isOwner = false, isPublic = fa
                 ))}
               </div>
             </div>
-            
+
             {/* Right Section - Map (Desktop Only) */}
             <div className="hidden lg:block">
               <div className="sticky top-8">
                 <Card className="overflow-hidden">
                   <CardContent className="p-0">
                     <div className="h-[calc(100vh-8rem)] min-h-[600px]">
-                      <ItineraryMap 
+                      <ItineraryMap
                         activities={itinerary.activities}
-                        apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
+                        apiKey={
+                          process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""
+                        }
                       />
                     </div>
                   </CardContent>
@@ -235,111 +285,115 @@ function ResultsContent({ itinerary, itineraryId, isOwner = false, isPublic = fa
         </main>
       </div>
     </div>
-  )
+  );
 }
 
 function ResultsPageWrapper() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [itinerary, setItinerary] = useState<Itinerary | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [itineraryId, setItineraryId] = useState<string | null>(null)
-  const [isOwner, setIsOwner] = useState(false)
-  const [isPublic, setIsPublic] = useState(false)
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [itinerary, setItinerary] = useState<Itinerary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [itineraryId, setItineraryId] = useState<string | null>(null);
+  const [isOwner, setIsOwner] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
 
-  const handlePublicToggle = useCallback(async (nextPublic: boolean) => {
-    if (!itineraryId) {
-      throw new Error('Missing itinerary ID for public toggle')
-    }
+  const handlePublicToggle = useCallback(
+    async (nextPublic: boolean) => {
+      if (!itineraryId) {
+        throw new Error("Missing itinerary ID for public toggle");
+      }
 
-    const supabase = createClient()
-    const { error: updateError } = await supabase
-      .from('itineraries')
-      .update({ public: nextPublic })
-      .eq('id', itineraryId)
+      const supabase = createClient();
+      const { error: updateError } = await supabase
+        .from("itineraries")
+        .update({ public: nextPublic })
+        .eq("id", itineraryId);
 
-    if (updateError) {
-      throw updateError
-    }
+      if (updateError) {
+        throw updateError;
+      }
 
-    setIsPublic(nextPublic)
-  }, [itineraryId])
+      setIsPublic(nextPublic);
+    },
+    [itineraryId]
+  );
 
   // Get params from URL - either direct results or database ID
-  const resultsParam = searchParams?.get('results')
-  const idParam = searchParams?.get('id')
+  const resultsParam = searchParams?.get("results");
+  const idParam = searchParams?.get("id");
 
   useEffect(() => {
     async function loadItinerary() {
       try {
         // Priority 1: Load from database by ID
         if (idParam) {
-          const supabase = createClient()
+          const supabase = createClient();
           const { data, error: fetchError } = await supabase
-            .from('itineraries')
-            .select('itinerary_data, user_id, public')
-            .eq('id', idParam)
-            .single()
+            .from("itineraries")
+            .select("itinerary_data, user_id, public")
+            .eq("id", idParam)
+            .single();
 
           if (fetchError) {
-            console.error('Error fetching itinerary:', fetchError)
-            setError('Failed to load itinerary')
-            setLoading(false)
-            return
+            console.error("Error fetching itinerary:", fetchError);
+            setError("Failed to load itinerary");
+            setLoading(false);
+            return;
           }
 
           if (data && data.itinerary_data) {
             // Handle case where JSONB might be returned as string or needs parsing
             try {
-              const itineraryData = typeof data.itinerary_data === 'string' 
-                ? JSON.parse(data.itinerary_data)
-                : data.itinerary_data
-              
-              setItinerary(itineraryData as Itinerary)
-              setItineraryId(idParam)
+              const itineraryData =
+                typeof data.itinerary_data === "string"
+                  ? JSON.parse(data.itinerary_data)
+                  : data.itinerary_data;
+
+              setItinerary(itineraryData as Itinerary);
+              setItineraryId(idParam);
 
               const {
                 data: { user },
                 error: authError,
-              } = await supabase.auth.getUser()
+              } = await supabase.auth.getUser();
 
               if (authError) {
-                console.error('Error fetching user:', authError)
+                console.error("Error fetching user:", authError);
               }
 
-              setIsOwner(user?.id === data.user_id)
-              setIsPublic(Boolean(data.public))
+              setIsOwner(user?.id === data.user_id);
+              setIsPublic(Boolean(data.public));
             } catch (parseError) {
-              console.error('Error parsing itinerary data:', parseError)
-              setError('Failed to parse itinerary data')
+              console.error("Error parsing itinerary data:", parseError);
+              setError("Failed to parse itinerary data");
             }
           } else {
-            setError('Itinerary not found')
+            setError("Itinerary not found");
           }
-          setLoading(false)
-          return
+          setLoading(false);
+          return;
         }
 
         // Priority 2: Load from URL param (backward compatibility)
         if (resultsParam) {
-          const parsedItinerary: Itinerary = JSON.parse(resultsParam)
-          setItinerary(parsedItinerary)
-          setLoading(false)
-          return
+          const parsedItinerary: Itinerary = JSON.parse(resultsParam);
+          setItinerary(parsedItinerary);
+          setLoading(false);
+          return;
         }
 
         // No data available
-        router.push('/')
+        router.push("/");
       } catch (err) {
-        console.error('Error loading itinerary:', err)
-        setError('Failed to load itinerary')
-        setLoading(false)
+        console.error("Error loading itinerary:", err);
+        setError("Failed to load itinerary");
+        setLoading(false);
       }
     }
 
-    loadItinerary()
-  }, [idParam, resultsParam, router])
+    loadItinerary();
+  }, [idParam, resultsParam, router]);
 
   if (loading) {
     return (
@@ -348,11 +402,26 @@ function ResultsPageWrapper() {
         <div className="flex-1">
           <MobileNav />
           <main className="container max-w-[1600px] mx-auto p-4 sm:p-6 md:p-8">
-            <p className="text-sm sm:text-base">Loading results...</p>
+            <div className="flex flex-col items-center justify-center py-16 gap-6">
+              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+              <div className="text-center space-y-2">
+                <h3 className="text-xl font-serif italic text-primary">
+                  Crafting your perfect itinerary
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Just a moment while we load your adventure...
+                </p>
+              </div>
+              <div className="w-full max-w-2xl space-y-4">
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
+              </div>
+            </div>
           </main>
         </div>
       </div>
-    )
+    );
   }
 
   if (error || !itinerary) {
@@ -362,41 +431,60 @@ function ResultsPageWrapper() {
         <div className="flex-1">
           <MobileNav />
           <main className="container max-w-[1600px] mx-auto p-4 sm:p-6 md:p-8">
-            <p className="text-red-500 text-sm sm:text-base mb-4">{error || 'Failed to load itinerary'}</p>
-            <Button onClick={() => router.push('/')} className="mt-4">
+            <p className="text-red-500 text-sm sm:text-base mb-4">
+              {error || "Failed to load itinerary"}
+            </p>
+            <Button onClick={() => router.push("/")} className="mt-4">
               Go Home
             </Button>
           </main>
         </div>
       </div>
-    )
+    );
   }
 
   return (
-    <ResultsContent 
-      itinerary={itinerary} 
+    <ResultsContent
+      itinerary={itinerary}
       itineraryId={itineraryId || undefined}
       isOwner={isOwner}
       isPublic={isPublic}
       onTogglePublic={isOwner ? handlePublicToggle : undefined}
     />
-  )
+  );
 }
 
 export default function ResultsPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen">
-        <Sidebar />
-        <div className="flex-1">
-          <MobileNav />
-          <main className="container max-w-[1600px] mx-auto p-4 sm:p-6 md:p-8">
-            <p className="text-sm sm:text-base">Loading results...</p>
-          </main>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen">
+          <Sidebar />
+          <div className="flex-1">
+            <MobileNav />
+            <main className="container max-w-[1600px] mx-auto p-4 sm:p-6 md:p-8">
+              <div className="flex flex-col items-center justify-center py-16 gap-6">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <div className="text-center space-y-2">
+                  <h3 className="text-xl font-serif italic text-primary">
+                    Crafting your perfect itinerary
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Just a moment while we load your adventure...
+                  </p>
+                </div>
+                <div className="w-full max-w-2xl space-y-4">
+                  <Skeleton className="h-32 w-full" />
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-24 w-full" />
+                </div>
+              </div>
+            </main>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <ResultsPageWrapper />
     </Suspense>
-  )
+  );
 }
