@@ -12,6 +12,7 @@ import {
   Info,
   User,
   ChevronDown,
+  Compass,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -139,6 +140,20 @@ export function Sidebar() {
           >
             <PlusCircle className="h-5 w-5" />
             {isExpanded && <span className="ml-2">New Activity</span>}
+          </Button>
+        </Link>
+
+        {/* Explore */}
+        <Link href="/explore" onClick={(e) => e.stopPropagation()}>
+          <Button
+            variant={isActive("/explore") ? "default" : "ghost"}
+            className={cn(
+              "w-full justify-start",
+              !isExpanded && "justify-center p-0 h-12 w-12"
+            )}
+          >
+            <Compass className="h-5 w-5" />
+            {isExpanded && <span className="ml-2">Explore</span>}
           </Button>
         </Link>
 

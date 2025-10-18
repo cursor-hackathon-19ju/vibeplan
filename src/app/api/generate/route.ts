@@ -36,12 +36,12 @@ export async function POST(request: NextRequest) {
     // STEP 3: Fetch results from Exa (web search)
     const exa = new Exa(process.env.EXA_API_KEY);
     const refined_query = `I want to plan an activity that includes ${body.activities.length > 0 ? body.activities.join(', ') : 'a mix of activities'}, for a total of ${body.numPax || 'a few'} people. The budget is ${body.budget} on a scale of 0–4 (where 0 = <$30 and 4 = $100+). This plan is tailored for individuals with the MBTI type ${body.mbti || 'any type'}. ${body.spicy ? 'It should also include drinks and nightlife.' : ''} The main preference or goal is: "${body.query}".`
-    
+
     // Calculate date range: 30 days ago to today
     const endDate = new Date()
     const startDate = new Date()
     startDate.setDate(startDate.getDate() - 30)
-    
+
     const exa_result = await exa.searchAndContents(
       `${refined_query}`,
       {

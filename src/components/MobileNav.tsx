@@ -1,45 +1,55 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { usePathname } from "next/navigation"
-import { Menu, X, PlusCircle, History, Info, User } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import {
+  Menu,
+  X,
+  PlusCircle,
+  History,
+  Info,
+  User,
+  Compass,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"
-import { Separator } from "@/components/ui/separator"
-import { createClient } from "@/lib/supabase"
-import IconLogo from "@/app/assets/Icon Logo.png"
-import FullLogo from "@/app/assets/Full Logo.png"
+} from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
+import { createClient } from "@/lib/supabase";
+import IconLogo from "@/app/assets/Icon Logo.png";
+import FullLogo from "@/app/assets/Full Logo.png";
 
 const mockHistoryItems = [
   { id: 1, query: "Date night under $50", date: "2 days ago" },
   { id: 2, query: "Family weekend activities", date: "1 week ago" },
   { id: 3, query: "Artsy cafes and museums", date: "2 weeks ago" },
-]
+];
 
 export function MobileNav() {
-  const [open, setOpen] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const pathname = usePathname()
-  const supabase = createClient()
+  const [open, setOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const pathname = usePathname();
+  const supabase = createClient();
 
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-    }
-    getUser()
-  }, [supabase.auth])
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, [supabase.auth]);
 
-  const isActive = (path: string) => pathname === path
+  const isActive = (path: string) => pathname === path;
 
   return (
     <div className="md:hidden">
@@ -63,7 +73,7 @@ export function MobileNav() {
               />
             </div>
           </Link>
-          
+
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -74,7 +84,11 @@ export function MobileNav() {
             <SheetContent side="left">
               <SheetHeader>
                 <SheetTitle className="text-left">
-                  <Link href="/" className="flex items-end" onClick={() => setOpen(false)}>
+                  <Link
+                    href="/"
+                    className="flex items-end"
+                    onClick={() => setOpen(false)}
+                  >
                     <div className="relative w-8 h-8 flex-shrink-0">
                       <Image
                         src={IconLogo}
@@ -106,6 +120,16 @@ export function MobileNav() {
                   </Button>
                 </Link>
 
+                <Link href="/explore" onClick={() => setOpen(false)}>
+                  <Button
+                    variant={isActive("/explore") ? "default" : "ghost"}
+                    className="w-full justify-start"
+                  >
+                    <Compass className="h-5 w-5 mr-2" />
+                    Explore
+                  </Button>
+                </Link>
+
                 <div>
                   <Link href="/history" onClick={() => setOpen(false)}>
                     <Button
@@ -125,7 +149,9 @@ export function MobileNav() {
                         className="block p-2 hover:bg-accent rounded-md"
                       >
                         <p className="text-sm font-medium">{item.query}</p>
-                        <p className="text-xs text-muted-foreground">{item.date}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {item.date}
+                        </p>
                       </Link>
                     ))}
                   </div>
@@ -158,7 +184,9 @@ export function MobileNav() {
                     ) : (
                       <User className="h-5 w-5" />
                     )}
-                    {user?.user_metadata?.full_name || user?.user_metadata?.name || 'Profile'}
+                    {user?.user_metadata?.full_name ||
+                      user?.user_metadata?.name ||
+                      "Profile"}
                   </Button>
                 </Link>
               </nav>
@@ -167,6 +195,5 @@ export function MobileNav() {
         </div>
       </header>
     </div>
-  )
+  );
 }
-
