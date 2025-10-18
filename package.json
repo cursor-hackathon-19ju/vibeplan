@@ -22,8 +22,6 @@
     "@supabase/ssr": "^0.1.0",
     "@supabase/supabase-js": "^2.39.0",
     "@vis.gl/react-google-maps": "^1.5.5",
-    "chromadb": "^1.8.1",
-    "chromadb-default-embed": "^2.14.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "date-fns": "^3.3.0",
