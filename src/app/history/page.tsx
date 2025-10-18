@@ -15,7 +15,8 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, Search } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Clock, Search, Loader2 } from "lucide-react";
 import { useFullHistory } from "@/lib/hooks/useHistory";
 
 const budgetLabels = [
@@ -27,14 +28,14 @@ const budgetLabels = [
 ];
 
 interface HistoryItem {
-  id: string
-  query: string
-  created_at: string
-  activities: string[]
-  budget: number
-  num_pax: string
-  mbti?: string
-  spicy?: boolean
+  id: string;
+  query: string;
+  created_at: string;
+  activities: string[];
+  budget: number;
+  num_pax: string;
+  mbti?: string;
+  spicy?: boolean;
   itinerary_data: {
     activities: any[];
   };
@@ -85,7 +86,42 @@ export default function HistoryPage() {
         <div className="flex-1">
           <MobileNav />
           <main className="container max-w-4xl mx-auto p-6 md:p-8">
-            <p>Loading history...</p>
+            <div className="mb-8">
+              <h1 className="text-4xl md:text-5xl font-serif italic mb-2">
+                Search History
+              </h1>
+              <p className="text-muted-foreground text-lg">
+                Your past searches and activity recommendations
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center justify-center py-12 gap-6">
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              <p className="text-muted-foreground">Loading your history...</p>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardHeader>
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-6 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap gap-2">
+                        <Skeleton className="h-6 w-20" />
+                        <Skeleton className="h-6 w-24" />
+                        <Skeleton className="h-6 w-16" />
+                      </div>
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </main>
         </div>
       </div>
