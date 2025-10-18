@@ -16,6 +16,41 @@ function getOpenAIClient(): OpenAI {
   return openaiInstance
 }
 
+/**
+ * Generate random coordinates within a specified radius from a center point
+ * @param centerLat - Center latitude
+ * @param centerLng - Center longitude
+ * @param radiusKm - Radius in kilometers
+ * @returns Random coordinates within the radius
+ */
+function getRandomCoordinatesWithinRadius(
+  centerLat: number,
+  centerLng: number,
+  radiusKm: number
+): { lat: number; lng: number } {
+  // Convert radius from kilometers to degrees
+  // 1 degree ≈ 111 km at the equator
+  const radiusInDegrees = radiusKm / 111.0
+
+  // Generate random angle and distance
+  const angle = Math.random() * 2 * Math.PI
+  const distance = Math.sqrt(Math.random()) * radiusInDegrees
+
+  // Calculate offset
+  const deltaLat = distance * Math.cos(angle)
+  const deltaLng = distance * Math.sin(angle) / Math.cos(centerLat * Math.PI / 180)
+
+  return {
+    lat: parseFloat((centerLat + deltaLat).toFixed(6)),
+    lng: parseFloat((centerLng + deltaLng).toFixed(6))
+  }
+}
+
+// Singapore central coordinates
+const SINGAPORE_CENTRAL_LAT = 1.290270
+const SINGAPORE_CENTRAL_LNG = 103.851959
+const DEFAULT_RADIUS_KM = 2
+
 interface UserPreferences {
   query: string
   budget: number
@@ -84,7 +119,7 @@ REQUIREMENTS:
 3. Consider logical flow (e.g., breakfast → lunch → activity → dinner)
 4. Ensure variety - don't select multiple activities of the same type (e.g., no "brunch → brunch → brunch")
 5. Preserve ALL original fields including source_link, latitude, longitude
-6. For coordinates: use latitude/longitude from activity if available, otherwise use Singapore central (lat 1.290270, lng 103.851959)
+6. For coordinates: use latitude/longitude from activity if available. If not available, set coordinates to null - they will be filled in later.
 7. Return ONLY valid JSON
 
 OUTPUT FORMAT:
@@ -94,7 +129,7 @@ OUTPUT FORMAT:
       ...all fields from original activity including source_link, latitude, longitude...,
       "id": 1,
       "time": "9:00 AM - 11:00 AM",
-      "coordinates": {"lat": <use latitude if available, else 1.290270>, "lng": <use longitude if available, else 103.851959>}
+      "coordinates": {"lat": <use latitude if available, else null>, "lng": <use longitude if available, else null>}
     }
   ]
 }
@@ -110,9 +145,32 @@ Return ONLY the JSON, no explanations.`
     })
 
     const result = JSON.parse(response.choices[0].message.content || '{}')
-    console.log(`✅ Selected ${result.activities?.length || 0} activities`)
+    const activities = result.activities || []
 
-    return result.activities || []
+    // Post-process: fill in random coordinates for activities without them
+    const processedActivities = activities.map((activity: any) => {
+      // Check if coordinates are missing or null
+      if (!activity.coordinates ||
+          activity.coordinates.lat === null ||
+          activity.coordinates.lng === null ||
+          (activity.coordinates.lat === 1.290270 && activity.coordinates.lng === 103.851959)) {
+        // Generate random coordinates within 2km of Singapore central
+        const randomCoords = getRandomCoordinatesWithinRadius(
+          SINGAPORE_CENTRAL_LAT,
+          SINGAPORE_CENTRAL_LNG,
+          DEFAULT_RADIUS_KM
+        )
+        return {
+          ...activity,
+          coordinates: randomCoords
+        }
+      }
+      return activity
+    })
+
+    console.log(`✅ Selected ${processedActivities.length} activities`)
+
+    return processedActivities
   } catch (error) {
     console.error('❌ Activity selection error:', error)
     throw new Error('Failed to select activities')
