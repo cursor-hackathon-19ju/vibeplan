@@ -3,16 +3,18 @@
 export const dynamic = 'force-dynamic'
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect, Suspense, useCallback } from "react"
 import { Sidebar } from "@/components/Sidebar"
 import { MobileNav } from "@/components/MobileNav"
 import { TimelineActivity } from "@/components/TimelineActivity"
 import { ItineraryMap } from "@/components/ItineraryMap"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { ArrowLeft, RefreshCw, Map, DollarSign, Clock, MapPin, Tag } from "lucide-react"
+import { ArrowLeft, RefreshCw, Map, DollarSign, Clock, MapPin, Tag, Share2, Lock, Eye } from "lucide-react"
 import { createClient } from "@/lib/supabase"
+import { Switch } from "@/components/ui/switch"
 
 // TypeScript interfaces for the itinerary data
 interface Coordinates {
@@ -48,11 +50,21 @@ interface Itinerary {
 
 interface ResultsContentProps {
   itinerary: Itinerary
+  itineraryId?: string
+  isOwner?: boolean
+  isPublic?: boolean
+  onTogglePublic?: (nextPublic: boolean) => Promise<void>
 }
 
-function ResultsContent({ itinerary }: ResultsContentProps) {
+function ResultsContent({ itinerary, itineraryId, isOwner = false, isPublic = false, onTogglePublic }: ResultsContentProps) {
   const router = useRouter()
   const [mapOpen, setMapOpen] = useState(false)
+  const [publicState, setPublicState] = useState(isPublic)
+
+  // Sync publicState with prop changes
+  useEffect(() => {
+    setPublicState(isPublic)
+  }, [isPublic])
 
   return (
     <div className="flex min-h-screen">
@@ -75,6 +87,46 @@ function ResultsContent({ itinerary }: ResultsContentProps) {
                <RefreshCw className="h-4 w-4 mr-2" />
                Refine Search
              </Button>
+            
+            {/* Share Toggle - Only visible to owner */}
+            {isOwner && (
+              <div className="flex items-center gap-3 px-4 py-2 border rounded-lg">
+                <div className="flex items-center gap-2">
+                  {publicState ? (
+                    <Share2 className="h-4 w-4 text-primary" />
+                  ) : (
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  <span className="text-sm font-medium w-[50px]">
+                    {publicState ? "Public" : "Private"}
+                  </span>
+                </div>
+                <Switch
+                  checked={publicState}
+                  onCheckedChange={async (checked) => {
+                    setPublicState(checked)
+                    if (!onTogglePublic) return
+
+                    try {
+                      await onTogglePublic(checked)
+                    } catch (toggleError) {
+                      console.error("Failed to update public status:", toggleError)
+                      setPublicState(!checked)
+                    }
+                  }}
+                />
+              </div>
+            )}
+            
+            {/* Visitor view-only indicator */}
+            {!isOwner && (
+              <Badge variant="outline" className="flex items-center gap-1 px-3 py-1">
+                <Eye className="h-3 w-3 text-muted-foreground" />
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  View Only
+                </span>
+              </Badge>
+            )}
             
             {/* Mobile Map Toggle */}
             <Sheet open={mapOpen} onOpenChange={setMapOpen}>
@@ -191,6 +243,27 @@ function ResultsPageWrapper() {
   const [itinerary, setItinerary] = useState<Itinerary | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [itineraryId, setItineraryId] = useState<string | null>(null)
+  const [isOwner, setIsOwner] = useState(false)
+  const [isPublic, setIsPublic] = useState(false)
+
+  const handlePublicToggle = useCallback(async (nextPublic: boolean) => {
+    if (!itineraryId) {
+      throw new Error('Missing itinerary ID for public toggle')
+    }
+
+    const supabase = createClient()
+    const { error: updateError } = await supabase
+      .from('itineraries')
+      .update({ public: nextPublic })
+      .eq('id', itineraryId)
+
+    if (updateError) {
+      throw updateError
+    }
+
+    setIsPublic(nextPublic)
+  }, [itineraryId])
 
   // Get params from URL - either direct results or database ID
   const resultsParam = searchParams?.get('results')
@@ -204,7 +277,7 @@ function ResultsPageWrapper() {
           const supabase = createClient()
           const { data, error: fetchError } = await supabase
             .from('itineraries')
-            .select('itinerary_data')
+            .select('itinerary_data, user_id, public')
             .eq('id', idParam)
             .single()
 
@@ -223,6 +296,19 @@ function ResultsPageWrapper() {
                 : data.itinerary_data
               
               setItinerary(itineraryData as Itinerary)
+              setItineraryId(idParam)
+
+              const {
+                data: { user },
+                error: authError,
+              } = await supabase.auth.getUser()
+
+              if (authError) {
+                console.error('Error fetching user:', authError)
+              }
+
+              setIsOwner(user?.id === data.user_id)
+              setIsPublic(Boolean(data.public))
             } catch (parseError) {
               console.error('Error parsing itinerary data:', parseError)
               setError('Failed to parse itinerary data')
@@ -285,7 +371,15 @@ function ResultsPageWrapper() {
     )
   }
 
-  return <ResultsContent itinerary={itinerary} />
+  return (
+    <ResultsContent 
+      itinerary={itinerary} 
+      itineraryId={itineraryId || undefined}
+      isOwner={isOwner}
+      isPublic={isPublic}
+      onTogglePublic={isOwner ? handlePublicToggle : undefined}
+    />
+  )
 }
 
 export default function ResultsPage() {
