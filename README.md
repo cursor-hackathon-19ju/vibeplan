@@ -56,7 +56,11 @@ VibePlan is an AI-powered activity recommendation tool that helps you discover t
 
 - Node.js 18+ installed
 - npm or yarn package manager
+- Python 3.9+ installed
+- pip (Python package manager)
 - A Supabase account (free tier works!)
+- OpenAI API key
+- Exa API key
 
 ### Installation
 
@@ -66,12 +70,17 @@ git clone https://github.com/yourusername/vibeplan.git
 cd vibeplan
 ```
 
-2. Install dependencies:
+2. Install Node.js dependencies:
 ```bash
 npm install
 ```
 
-3. Set up environment variables:
+3. Install Python dependencies:
+```bash
+pip3 install -r requirements.txt
+```
+
+4. Set up environment variables:
 
 Create a `.env.local` file in the root directory with the following variables:
 
@@ -84,25 +93,52 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 EXA_API_KEY=your_exa_api_key
 OPENAI_API_KEY=your_openai_api_key
 
-# Google Services
+# Google Services (Optional)
 GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 
-# Database & Vector Store
-CHROMA_DB_URL=your_chromadb_connection_string
-
-# Social Media & Scraping
+# Social Media & Scraping (Optional)
 TELEGRAM_API_ID=your_telegram_api_id
 TELEGRAM_API_HASH=your_telegram_api_hash
 ```
 
 See the [Supabase Setup](#supabase-setup) section below for detailed instructions.
 
-4. Run the development server:
+### Running the Application
+
+VibePlan requires **two servers** to run:
+
+1. **ChromaDB FastAPI Bridge** (Port 8001) - Handles vector database queries
+2. **Next.js Development Server** (Port 3000) - Main web application
+
+#### Option 1: Run in Separate Terminals (Recommended)
+
+**Terminal 1 - ChromaDB FastAPI Bridge:**
+```bash
+python3 chromadb_api.py
+```
+
+**Terminal 2 - Next.js Server:**
 ```bash
 npm run dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+#### Option 2: Run in Background
+
+**Start ChromaDB Bridge in background:**
+```bash
+python3 chromadb_api.py &
+```
+
+**Start Next.js:**
+```bash
+npm run dev
+```
+
+Once both servers are running, open [http://localhost:3000](http://localhost:3000) in your browser.
+
+**Health Check:**
+- Next.js: http://localhost:3000
+- ChromaDB API: http://localhost:8001/health
 
 ## Supabase Setup
 
@@ -162,6 +198,40 @@ To enable Google sign-in:
    - `http://localhost:3000/auth/callback` (for development)
    - Add your production URL when deploying
 
+## ChromaDB Integration
+
+VibePlan uses a **FastAPI bridge** to access ChromaDB from Next.js, bypassing webpack compatibility issues.
+
+### Architecture
+
+```
+User Request → Next.js API → FastAPI Bridge → ChromaDB → OpenAI Embeddings
+                     ↓                              ↓
+                Exa Search                    Vector Search
+                     ↓                              ↓
+                     └──────── LLM Curator ────────┘
+                                  ↓
+                            Final Itinerary
+```
+
+### How It Works
+
+1. **Semantic Keywords**: User preferences (MBTI, budget, group size) are enriched into semantic keywords
+2. **Dual Data Sources**:
+   - **ChromaDB**: 381 curated activities from Telegram scraping (15 results)
+   - **Exa API**: Real-time web search for fresh content (5 results)
+3. **LLM Curation**: GPT-4o selects 4-6 best activities and creates timeline
+4. **Enhancement**: AI estimates prices and generates engaging summaries
+
+### Files
+
+- `chromadb_api.py` - FastAPI bridge server (port 8001)
+- `src/app/api/generate/utils/chromaClient.ts` - HTTP client for ChromaDB API
+- `src/app/api/generate/utils/keywords.ts` - Semantic keyword builder
+- `src/app/api/generate/utils/llmCurator.ts` - GPT-4o activity curation
+- `test_chroma_api.py` - Test script for semantic search
+- `requirements.txt` - Python dependencies
+
 ## Project Structure
 
 ```
@@ -171,6 +241,7 @@ vibeplan/
 │   │   ├── about/             # About page
 │   │   ├── api/               # API routes
 │   │   │   └── generate/      # Activity generation endpoint
+│   │   │       └── utils/     # ChromaDB, LLM, keywords utilities
 │   │   ├── auth/              # Auth callback
 │   │   ├── history/           # Search history page
 │   │   ├── loading/           # Loading page with animation
@@ -191,10 +262,16 @@ vibeplan/
 │       ├── supabase.ts        # Supabase client
 │       ├── supabase-server.ts # Supabase server client
 │       └── utils.ts           # Utility functions
+├── data/
+│   └── chroma_db/             # ChromaDB persistent storage
+├── chromadb_api.py            # FastAPI bridge for ChromaDB
+├── requirements.txt           # Python dependencies
+├── test_chroma_api.py         # ChromaDB query testing
+├── test_chroma_queries.ipynb  # Jupyter notebook for analysis
 ├── middleware.ts              # Auth middleware
 ├── tailwind.config.ts         # Tailwind configuration
 ├── tsconfig.json             # TypeScript configuration
-└── package.json              # Dependencies
+└── package.json              # Node.js dependencies
 ```
 
 ## Usage
@@ -303,16 +380,17 @@ npm run lint
 
 Required environment variables:
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL | `https://xxxxx.supabase.co` |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anonymous key | `eyJhbGc...` |
-| `EXA_API_KEY` | Exa API key for content search | `c7f153...` |
-| `OPENAI_API_KEY` | OpenAI API key for AI processing | `sk-...` |
-| `GOOGLE_MAPS_API_KEY` | Google Maps API key | `AIza...` |
-| `CHROMA_DB_URL` | ChromaDB connection string | `http://localhost:8000` |
-| `TELEGRAM_API_ID` | Telegram API ID | `12345678` |
-| `TELEGRAM_API_HASH` | Telegram API hash | `abcdef...` |
+| Variable | Description | Required | Example |
+|----------|-------------|----------|---------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL | ✅ Yes | `https://xxxxx.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anonymous key | ✅ Yes | `eyJhbGc...` |
+| `EXA_API_KEY` | Exa API key for content search | ✅ Yes | `c7f153...` |
+| `OPENAI_API_KEY` | OpenAI API key for AI processing | ✅ Yes | `sk-...` |
+| `GOOGLE_MAPS_API_KEY` | Google Maps API key | ❌ No | `AIza...` |
+| `TELEGRAM_API_ID` | Telegram API ID | ❌ No | `12345678` |
+| `TELEGRAM_API_HASH` | Telegram API hash | ❌ No | `abcdef...` |
+
+**Note**: The ChromaDB connection is handled automatically by the FastAPI bridge on `localhost:8001`. No separate configuration needed.
 
 ## Future Enhancements
 
@@ -325,6 +403,54 @@ Required environment variables:
 - [ ] Weather-based recommendations
 - [ ] Map integration
 - [ ] Mobile app (React Native)
+
+## Troubleshooting
+
+### ChromaDB API Connection Issues
+
+**Problem**: `Connection refused` or `fetch failed` errors
+
+**Solutions**:
+1. Make sure the FastAPI bridge is running: `python3 chromadb_api.py`
+2. Check if port 8001 is available: `lsof -i :8001`
+3. Verify the health endpoint: `curl http://localhost:8001/health`
+
+### Python Import Errors
+
+**Problem**: `ModuleNotFoundError` for fastapi, chromadb, etc.
+
+**Solution**:
+```bash
+pip3 install -r requirements.txt
+```
+
+### OpenAI API Key Not Found
+
+**Problem**: `OPENAI_API_KEY not found` error
+
+**Solutions**:
+1. Make sure `.env.local` exists in the root directory
+2. Verify the key is set correctly in `.env.local`
+3. Restart both servers after updating `.env.local`
+
+### ChromaDB Collection Not Found
+
+**Problem**: `Collection 'telegram_activities' not found`
+
+**Solution**: You need the pre-populated ChromaDB database. Contact the repo maintainers or populate it using the Telegram scraping scripts.
+
+### Port Already in Use
+
+**Problem**: `Port 3000 is already in use` or `Port 8001 is already in use`
+
+**Solutions**:
+```bash
+# For Next.js (port 3000)
+lsof -ti:3000 | xargs kill -9
+
+# For FastAPI (port 8001)
+lsof -ti:8001 | xargs kill -9
+```
 
 ## Contributing
 

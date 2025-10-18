@@ -1,0 +1,10 @@
+# FastAPI Bridge Dependencies
+fastapi==0.115.5
+uvicorn[standard]==0.34.0
+
+# ChromaDB and Embeddings
+chromadb==0.5.23
+python-dotenv==1.0.1
+
+# HTTP Client
+requests==2.32.3
