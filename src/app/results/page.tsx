@@ -30,6 +30,7 @@ interface Activity {
   location: string
   price: string
   discount?: string
+  source_link?: string
   coordinates: Coordinates
 }
 

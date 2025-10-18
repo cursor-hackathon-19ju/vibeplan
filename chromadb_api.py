@@ -72,6 +72,9 @@ class Activity(BaseModel):
     validity_end: Optional[str]
     source_channel: Optional[str] = ""
     source_type: Optional[str] = ""
+    source_link: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 class SearchResponse(BaseModel):
@@ -140,6 +143,21 @@ async def search_activities(request: SearchRequest):
                 # Parse full_data JSON string
                 full_data = json.loads(metadata['full_data'])
 
+                # Parse source_link (it's stored as a JSON array string)
+                source_link_raw = full_data.get('source_link')
+                source_link = None
+                if source_link_raw:
+                    try:
+                        # Try to parse as JSON array and get first link
+                        links = json.loads(source_link_raw)
+                        if isinstance(links, list) and len(links) > 0:
+                            source_link = links[0]
+                        else:
+                            source_link = source_link_raw
+                    except:
+                        # If not JSON, use as is
+                        source_link = source_link_raw
+
                 # Create Activity object
                 activity = Activity(
                     title=full_data.get('title', 'Untitled'),
@@ -152,7 +170,10 @@ async def search_activities(request: SearchRequest):
                     offer_type=full_data.get('offer_type', 'activity'),
                     validity_end=full_data.get('validity_end'),
                     source_channel=full_data.get('source_channel', ''),
-                    source_type=full_data.get('source_type', '')
+                    source_type=full_data.get('source_type', ''),
+                    source_link=source_link,
+                    latitude=full_data.get('latitude'),
+                    longitude=full_data.get('longitude')
                 )
 
                 activities.append(activity)

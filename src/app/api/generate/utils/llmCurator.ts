@@ -76,42 +76,25 @@ CANDIDATE ACTIVITIES:
 ${JSON.stringify(candidateActivities, null, 2)}
 
 TASK:
-Analyze the user's query and create a logical itinerary:
-
-QUERY ANALYSIS:
-1. If the user asks for a specific type of venue (e.g., "brunch spots", "cafes", "bars"):
-   - Select ONLY 1-2 activities of that type
-   - This is a recommendation list, not a full-day itinerary
-   - Don't create a timeline with multiple identical meal types
-
-2. If the user asks for a full day/activity plan (e.g., "plan my weekend", "things to do"):
-   - Select 4-6 diverse activities
-   - Create a realistic full-day timeline
-   - Ensure logical flow and variety
-
-LOGICAL CONSTRAINTS (CRITICAL):
-- NEVER select multiple meals of the same type (e.g., NO "brunch → brunch → brunch")
-- NEVER select duplicate venue types unless creating a comparison list
-- A person can only eat one breakfast, one brunch, one lunch, and one dinner per day
-- Mix different activity types: meals + attractions + experiences + nightlife
-- For meal-specific queries, return 1-2 top recommendations, not a full itinerary
+Select 4-6 activities that best match the user's preferences and create a logical timeline.
 
 REQUIREMENTS:
 1. Choose activities that fit the budget and preferences
 2. Create a realistic timeline with start/end times
-3. Ensure activities flow logically (breakfast 8-10AM → activity 10AM-2PM → lunch 12-2PM → activity 3-6PM → dinner 7-9PM)
-4. Add coordinates for each activity (use Singapore central: lat 1.290270, lng 103.851959 if missing)
-5. For single-venue queries (brunch spots, cafes, bars), limit to 1-2 options
-6. Return ONLY valid JSON
+3. Consider logical flow (e.g., breakfast → lunch → activity → dinner)
+4. Ensure variety - don't select multiple activities of the same type (e.g., no "brunch → brunch → brunch")
+5. Preserve ALL original fields including source_link, latitude, longitude
+6. For coordinates: use latitude/longitude from activity if available, otherwise use Singapore central (lat 1.290270, lng 103.851959)
+7. Return ONLY valid JSON
 
 OUTPUT FORMAT:
 {
   "activities": [
     {
-      ...all fields from original activity...,
+      ...all fields from original activity including source_link, latitude, longitude...,
       "id": 1,
       "time": "9:00 AM - 11:00 AM",
-      "coordinates": {"lat": 1.xxx, "lng": 103.xxx}
+      "coordinates": {"lat": <use latitude if available, else 1.290270>, "lng": <use longitude if available, else 103.851959>}
     }
   ]
 }
@@ -146,18 +129,23 @@ export async function enhanceItinerary(
 
 Your task:
 
-1. If an activity's "price" is 0, null, or missing, estimate a realistic price in SGD based on its type and context. Use reasonable Singapore price ranges:
+1. **Add contextual emojis to activity titles:**
+   - Prepend ONE relevant emoji that matches the activity type/vibe
+   - Examples: "🥐 Brunch at The Cozy Corner", "🎨 Art Gallery Visit", "🌳 Park Picnic", "🍸 Cocktails at Rooftop Bar"
+   - Choose emojis that feel natural and enhance readability
+
+2. If an activity's "price" is 0, null, or missing, estimate a realistic price in SGD based on its type and context. Use reasonable Singapore price ranges:
    - Café / local food: $5–$15
    - Museum / attraction: $10–$40
    - Premium / adventure experience: $50+
    - Free outdoor / sightseeing: $0
    Keep the price as a float with 2 decimals.
 
-2. Keep all original fields, only update the "price" field if needed.
+3. Keep all original fields (including coordinates, source_link, latitude, longitude), only update the "title" (with emoji) and "price" fields if needed.
 
-3. Do NOT hallucinate or invent any information. Only include data that can be directly inferred from the provided activities JSON.
+4. Do NOT hallucinate or invent any information. Only include data that can be directly inferred from the provided activities JSON.
 
-4. For the "summary" section:
+5. For the "summary" section:
    - If budget can be computed (sum of all activity prices), include it as: "$<total> SGD".
    - If duration can be derived from timestamps in the activities (e.g., start/end time fields), include it as: "<start> – <end> (<approx duration>)".
    - If area can be inferred from activity location fields (e.g., all mention 'Sentosa' or 'Marina Bay'), include it.

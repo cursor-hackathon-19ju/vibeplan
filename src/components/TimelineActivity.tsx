@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, DollarSign, Tag } from "lucide-react"
+import { MapPin, DollarSign, Tag, ExternalLink } from "lucide-react"
 
 interface TimelineActivity {
   id: number
@@ -11,6 +11,7 @@ interface TimelineActivity {
   price?: string
   tags?: string[]
   discount?: string
+  source_link?: string
   coordinates?: {
     lat: number
     lng: number
@@ -79,6 +80,19 @@ export function TimelineActivity({ activity, isLast = false }: TimelineActivityP
               </Badge>
             ))}
           </div>
+        )}
+
+        {/* Source Link */}
+        {activity.source_link && (
+          <a
+            href={activity.source_link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+          >
+            <ExternalLink className="h-4 w-4" />
+            <span>View source</span>
+          </a>
         )}
       </div>
     </div>
