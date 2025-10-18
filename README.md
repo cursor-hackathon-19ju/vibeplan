@@ -21,6 +21,7 @@ VibePlan is an AI-powered activity recommendation tool that helps you discover t
 
 ## Tech Stack
 
+### Frontend
 - **Framework**: Next.js 14+ with App Router
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
@@ -28,6 +29,26 @@ VibePlan is an AI-powered activity recommendation tool that helps you discover t
 - **Authentication**: Supabase Auth
 - **Fonts**: Instrument Sans (body) & Instrument Serif (emphasis)
 - **Icons**: Lucide React
+
+### Backend & AI
+- **Database**: Supabase (PostgreSQL)
+- **Vector Database**: ChromaDB for RAG (Retrieval-Augmented Generation)
+- **AI/LLM**: OpenAI GPT models for activity recommendations
+- **Search Engine**: Exa API for real-time content discovery
+- **Web Scraping**: Selenium for automated data collection
+- **Telegram Integration**: Telethon for social media data extraction
+
+### APIs & Services
+- **Maps**: Google Maps API for location services
+- **Authentication**: Google OAuth via Supabase
+- **Real-time Data**: Exa API for current activity information
+- **Social Media**: Telegram API integration for trending activities
+
+### Data Pipeline
+- **RAG System**: ChromaDB + OpenAI for intelligent activity matching
+- **Web Scraping**: Selenium for automated venue data collection
+- **Social Monitoring**: Telethon for real-time social media trends
+- **Content Curation**: AI-powered activity database management
 
 ## Getting Started
 
@@ -58,6 +79,20 @@ Create a `.env.local` file in the root directory with the following variables:
 # Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# AI & Search APIs
+EXA_API_KEY=your_exa_api_key
+OPENAI_API_KEY=your_openai_api_key
+
+# Google Services
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+
+# Database & Vector Store
+CHROMA_DB_URL=your_chromadb_connection_string
+
+# Social Media & Scraping
+TELEGRAM_API_ID=your_telegram_api_id
+TELEGRAM_API_HASH=your_telegram_api_hash
 ```
 
 See the [Supabase Setup](#supabase-setup) section below for detailed instructions.
@@ -187,16 +222,27 @@ Try these prompts to get started:
 - "Chill activities for introverts under $30."
 - "Adventurous outdoor activities with a spicy nightlife twist."
 
-## API Integration
+## AI & Data Pipeline
 
-The current implementation uses placeholder mock data. To integrate with your AI/LLM pipeline and activity database:
+VibePlan uses a sophisticated AI pipeline to deliver personalized recommendations:
 
-1. Locate `/src/app/api/generate/route.ts`
-2. Replace the TODO section with your actual implementation:
-   - Parse user preferences and query
-   - Query your activities database
-   - Use AI/LLM to rank and personalize recommendations
-   - Return customized activity suggestions
+### RAG (Retrieval-Augmented Generation) System
+- **Vector Database**: ChromaDB stores embeddings of activities and venues
+- **Semantic Search**: Find similar activities based on user preferences
+- **Context-Aware**: AI considers user's MBTI, budget, and activity history
+
+### Real-time Data Collection
+- **Web Scraping**: Selenium automates data collection from venue websites
+- **Social Monitoring**: Telethon extracts trending activities from Telegram channels
+- **Content Discovery**: Exa API finds fresh content and reviews
+- **Maps Integration**: Google Maps API provides location data and directions
+
+### AI Processing Pipeline
+1. **User Input Analysis**: Parse preferences, budget, and natural language query
+2. **Vector Search**: Query ChromaDB for semantically similar activities
+3. **Content Enrichment**: Combine with real-time data from Exa and social media
+4. **LLM Generation**: OpenAI GPT creates personalized recommendations
+5. **Ranking & Filtering**: AI ranks activities by relevance and user preferences
 
 Example API response format:
 ```json
@@ -261,6 +307,12 @@ Required environment variables:
 |----------|-------------|---------|
 | `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL | `https://xxxxx.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anonymous key | `eyJhbGc...` |
+| `EXA_API_KEY` | Exa API key for content search | `c7f153...` |
+| `OPENAI_API_KEY` | OpenAI API key for AI processing | `sk-...` |
+| `GOOGLE_MAPS_API_KEY` | Google Maps API key | `AIza...` |
+| `CHROMA_DB_URL` | ChromaDB connection string | `http://localhost:8000` |
+| `TELEGRAM_API_ID` | Telegram API ID | `12345678` |
+| `TELEGRAM_API_HASH` | Telegram API hash | `abcdef...` |
 
 ## Future Enhancements
 
