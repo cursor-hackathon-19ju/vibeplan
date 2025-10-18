@@ -17,6 +17,10 @@ import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
+import TelegramLogo from "@/app/assets/telegram-app-48.png"
+import InstagramLogo from "@/app/assets/instagram-48.png"
+import Lemon8Logo from "@/app/assets/Lemon8.png"
+import TiktokLogo from "@/app/assets/tiktok-48.png"
 
 const activityTypes = [
     "Outdoor",
@@ -184,7 +188,7 @@ export function FilterOptions() {
                                     onValueChange={setBudget}
                                     max={100}
                                     step={1}
-                                    className="mb-2"
+                                    className="mb-2 cursor-pointer"
                                 />
                                 <div className="flex justify-between text-[10px] text-muted-foreground mt-2">
                                     <span>Broke (&lt;$30)</span>
@@ -241,19 +245,42 @@ export function FilterOptions() {
                             <div className="flex items-center gap-2">
                                 <span className="text-xs text-muted-foreground">Sources:</span>
                                 <div className="flex gap-2">
-                                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs">
-                                        TG
+                                    <div className="relative w-6 h-6 rounded-full overflow-hidden">
+                                        <Image
+                                            src={TelegramLogo}
+                                            alt="Telegram"
+                                            fill
+                                            className="object-cover"
+                                        />
                                     </div>
-                                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs">
-                                        IG
+                                    <div className="relative w-6 h-6 rounded-full overflow-hidden">
+                                        <Image
+                                            src={InstagramLogo}
+                                            alt="Instagram"
+                                            fill
+                                            className="object-cover"
+                                        />
                                     </div>
-                                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs">
-                                        L8
+                                    <div className="relative w-6 h-6 rounded-full overflow-hidden">
+                                        <Image
+                                            src={Lemon8Logo}
+                                            alt="Lemon8"
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    </div>
+                                    <div className="relative w-6 h-6 rounded-full overflow-hidden">
+                                        <Image
+                                            src={TiktokLogo}
+                                            alt="TikTok"
+                                            fill
+                                            className="object-cover"
+                                        />
                                     </div>
                                 </div>
                             </div>
                             <Button type="submit" size="icon" className="h-10 w-10">
-                                <Send className="h-5 w-5" />
+                                <ArrowRight className="h-5 w-5" />
                                 <span className="sr-only">Generate activities</span>
                             </Button>
                         </div>
@@ -263,31 +290,37 @@ export function FilterOptions() {
 
             {/* Sample Prompts */}
             <div className="space-y-2 max-w-2xl mx-auto">
-                <Card>
-                    <CardContent className="p-2 space-y-1">
-                        {samplePrompts.map((prompt, index) => (
-                            <div
-                                key={index}
-                                className="flex items-center justify-between py-1 px-2 rounded-md cursor-pointer hover:bg-primary/5 transition-colors"
-                                onClick={() => copyPrompt(prompt, index)}
-                            >
-                                <p className="text-[10px] flex-1">{prompt}</p>
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="ml-2 shrink-0 h-5 w-5"
+                <div className="rounded-lg animate-pulse-border">
+                    <Card className="border-0">
+                        <CardContent className="p-2 space-y-1">
+                            {samplePrompts.map((prompt, index) => (
+                                <div
+                                    key={index}
+                                    className="flex items-center justify-between py-1 px-2 rounded-md cursor-pointer hover:bg-primary/5 transition-colors"
+                                    onClick={() => copyPrompt(prompt, index)}
                                 >
-                                    {copiedIndex === index ? (
-                                        <Check className="h-3 w-3 text-green-600" />
-                                    ) : (
-                                        <Copy className="h-3 w-3" />
-                                    )}
-                                </Button>
-                            </div>
-                        ))}
-                    </CardContent>
-                </Card>
+                                    <p className={`text-[10px] flex-1 transition-colors duration-300 ${
+                                        copiedIndex === index ? 'text-green-600' : ''
+                                    }`}>
+                                        {prompt}
+                                    </p>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="ml-2 shrink-0 h-5 w-5"
+                                    >
+                                        {copiedIndex === index ? (
+                                            <Check className="h-3 w-3 text-green-600" />
+                                        ) : (
+                                            <Copy className="h-3 w-3" />
+                                        )}
+                                    </Button>
+                                </div>
+                            ))}
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </form>
     )
