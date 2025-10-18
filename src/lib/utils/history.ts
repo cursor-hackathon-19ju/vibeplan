@@ -1,5 +1,5 @@
 import { getDefaultStore } from "jotai";
-import { addHistoryItemAtom, fetchHistoryAtom } from "../atoms";
+import { addHistoryItemAtom, fetchHistoryAtom, historyItemsAtom } from "../atoms";
 import { HistoryItem } from "../atoms";
 
 const store = getDefaultStore();
@@ -25,5 +25,5 @@ export function refreshHistoryFromStore() {
  * Useful for server-side operations or when you need to access the current state
  */
 export function getCurrentHistoryFromStore() {
-  return store.get(store.get(historyItemsAtom));
+  return store.get(historyItemsAtom);
 }

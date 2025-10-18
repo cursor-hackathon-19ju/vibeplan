@@ -43,6 +43,7 @@ interface Activity {
   location: string;
   price: string;
   discount?: string;
+  source_link?: string;
   coordinates: Coordinates;
 }
 
@@ -127,7 +128,7 @@ function ResultsContent({
                 </div>
                 <Switch
                   checked={publicState}
-                  onCheckedChange={async (checked) => {
+                  onCheckedChange={async (checked: boolean) => {
                     setPublicState(checked);
                     if (!onTogglePublic) return;
 

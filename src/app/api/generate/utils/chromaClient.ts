@@ -12,6 +12,13 @@ export interface Activity {
   validity_end: string | null
   source_channel: string
   source_type: string
+  source_link?: string | null
+  latitude?: number | null
+  longitude?: number | null
+  coordinates?: {
+    lat: number
+    lng: number
+  }
 }
 
 const CHROMADB_API_URL = 'http://localhost:8001'

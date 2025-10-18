@@ -5,6 +5,17 @@ import { buildSemanticKeywords } from './utils/keywords'
 import { queryActivities } from './utils/chromaClient'
 import { selectAndArrangeActivities, enhanceItinerary } from './utils/llmCurator'
 
+// Helper: Detect if query is venue-specific (e.g., "brunch spots", "cafes", "bars")
+function isVenueSpecificQuery(query: string): boolean {
+  const venuePatterns = [
+    /\b(brunch|breakfast|lunch|dinner)\s+(spot|place|venue)s?\b/i,
+    /\b(cafe|coffee|bar|restaurant|pub|bistro|eatery)s?\b/i,
+    /\bwhere\s+to\s+(eat|drink|brunch|dine)\b/i,
+    /\b(food|dining)\s+(spot|place|venue)s?\b/i
+  ]
+  return venuePatterns.some(pattern => pattern.test(query))
+}
+
 export async function POST(request: NextRequest) {
 
   try {
@@ -24,11 +35,32 @@ export async function POST(request: NextRequest) {
     })
     console.log('📝 Semantic query:', semanticQuery)
 
-    // STEP 2: Fetch activities from ChromaDB (local curated activities)
+    // STEP 2: Fetch activities from ChromaDB with multi-query strategy
     let chromaActivities: any[] = []
     try {
-      chromaActivities = await queryActivities(semanticQuery, 15)
-      console.log(`✅ ChromaDB: Found ${chromaActivities.length} activities`)
+      const isVenueQuery = isVenueSpecificQuery(body.query)
+
+      if (isVenueQuery) {
+        // Multi-query strategy: Get specific venues + diverse activities
+        console.log('🎯 Venue-specific query detected - using dual query strategy')
+
+        // Query 1: Get 3-5 of the requested venue type
+        const specificActivities = await queryActivities(semanticQuery, 5)
+        console.log(`✅ ChromaDB (specific): Found ${specificActivities.length} matching venues`)
+
+        // Query 2: Get 10 diverse complementary activities
+        const diverseQuery = `${body.query} things to do activities attractions experiences Singapore`
+        const diverseActivities = await queryActivities(diverseQuery, 10)
+        console.log(`✅ ChromaDB (diverse): Found ${diverseActivities.length} complementary activities`)
+
+        // Merge results (specific first, then diverse)
+        chromaActivities = [...specificActivities, ...diverseActivities]
+        console.log(`📊 ChromaDB: Combined ${chromaActivities.length} total activities (${specificActivities.length} specific + ${diverseActivities.length} diverse)`)
+      } else {
+        // Standard single query for full-day plans
+        chromaActivities = await queryActivities(semanticQuery, 15)
+        console.log(`✅ ChromaDB: Found ${chromaActivities.length} activities`)
+      }
     } catch (error) {
       console.warn('⚠️ ChromaDB query failed, continuing with Exa only:', error)
     }
@@ -96,10 +128,22 @@ export async function POST(request: NextRequest) {
         offer_type: 'activity',
         validity_end: null,
         source_channel: 'exa',
-        source_type: 'web'
+        source_type: 'web',
+        source_link: null, // Exa results don't have source links
+        latitude: null, // Will be added by LLM
+        longitude: null // Will be added by LLM
       }))
     ]
     console.log(`📊 Total combined activities: ${combinedActivities.length} (${chromaActivities.length} from ChromaDB + ${exaSummaries.length} from Exa)`)
+
+    // Log first activity to verify fields
+    if (chromaActivities.length > 0) {
+      const firstActivity = chromaActivities[0]
+      console.log('🔍 First ChromaDB activity fields:')
+      console.log(`   - source_link: ${firstActivity.source_link || 'MISSING'}`)
+      console.log(`   - latitude: ${firstActivity.latitude || 'MISSING'}`)
+      console.log(`   - longitude: ${firstActivity.longitude || 'MISSING'}`)
+    }
 
     // STEP 5: Use LLM to select 4-6 best activities and arrange timeline
     const selectedActivities = await selectAndArrangeActivities(
@@ -118,6 +162,16 @@ export async function POST(request: NextRequest) {
     // STEP 6: Enhance itinerary with price estimation and summary
     const itineraryData = await enhanceItinerary(selectedActivities)
     console.log(`✅ Generated itinerary: "${itineraryData.title}"`)
+
+    // Log final activity to verify fields are preserved
+    if (itineraryData.activities && itineraryData.activities.length > 0) {
+      const finalActivity = itineraryData.activities[0]
+      console.log('🔍 Final itinerary first activity fields:')
+      console.log(`   - source_link: ${finalActivity.source_link || 'MISSING'}`)
+      console.log(`   - latitude: ${finalActivity.latitude || 'MISSING'}`)
+      console.log(`   - longitude: ${finalActivity.longitude || 'MISSING'}`)
+      console.log(`   - coordinates: ${JSON.stringify(finalActivity.coordinates)}`)
+    }
 
     // Save to Supabase database
     const supabase = await createServerSupabaseClient()
