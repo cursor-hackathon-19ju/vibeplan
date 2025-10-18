@@ -151,18 +151,63 @@ export default function AboutPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="font-serif italic">Built With</CardTitle>
-                <CardDescription>Modern technologies for the best experience</CardDescription>
+                <CardDescription>Cutting-edge AI and web technologies</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'shadcn/ui', 'Supabase'].map((tech) => (
-                    <span
-                      key={tech}
-                      className="px-3 py-1 bg-secondary rounded-full text-sm font-medium"
-                    >
-                      {tech}
-                    </span>
-                  ))}
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2 text-primary">Frontend & UI</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'shadcn/ui'].map((tech) => (
+                      <span
+                        key={tech}
+                        className="px-3 py-1 bg-secondary rounded-full text-sm font-medium"
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold mb-2 text-primary">AI & Machine Learning</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {['OpenAI GPT', 'ChromaDB', 'RAG System', 'Vector Search'].map((tech) => (
+                      <span
+                        key={tech}
+                        className="px-3 py-1 bg-secondary rounded-full text-sm font-medium"
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold mb-2 text-primary">Data & APIs</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {['Supabase', 'Google Maps API', 'Exa API', 'Telegram API'].map((tech) => (
+                      <span
+                        key={tech}
+                        className="px-3 py-1 bg-secondary rounded-full text-sm font-medium"
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold mb-2 text-primary">Automation & Scraping</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {['Selenium', 'Telethon', 'Web Scraping', 'Social Monitoring'].map((tech) => (
+                      <span
+                        key={tech}
+                        className="px-3 py-1 bg-secondary rounded-full text-sm font-medium"
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </CardContent>
             </Card>
