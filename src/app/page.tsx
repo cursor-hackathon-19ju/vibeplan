@@ -7,20 +7,13 @@ export default function Home() {
     <div className="flex min-h-screen">
       <Sidebar />
       
-      <div className="flex-1">
+      <div className="flex-1 flex flex-col">
         <MobileNav />
         
-        <main className="container max-w-4xl mx-auto p-6 md:p-8">
-          <div className="mb-8">
-            <h1 className="text-4xl md:text-5xl font-serif italic mb-2">
-              Plan Your Perfect Weekend
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Tell us what you're looking for and let AI do the magic ✨
-            </p>
+        <main className="flex-1 flex items-center justify-center p-6 md:p-8">
+          <div className="w-full max-w-4xl">
+            <FilterOptions />
           </div>
-
-          <FilterOptions />
         </main>
       </div>
     </div>

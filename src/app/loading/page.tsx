@@ -57,7 +57,7 @@ function LoadingContent() {
       <div className="text-center space-y-8 max-w-md">
         {/* Main Loading Text */}
         <div className="space-y-4">
-          <h1 className="text-4xl md:text-5xl font-serif italic">
+          <h1 className="text-4xl md:text-5xl font-serif">
             Let me cook... 👨‍🍳
           </h1>
           <p className="text-muted-foreground text-lg">

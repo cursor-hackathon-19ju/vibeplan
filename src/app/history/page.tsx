@@ -95,7 +95,7 @@ export default function HistoryPage() {
           <div className="flex flex-col gap-4">
             {mockHistory.map((item) => (
               <Link key={item.id} href="/results">
-                <Card className="hover:shadow-md hover:border-cyan-400 transition-all cursor-pointer">
+                <Card className="hover:border-cyan-400 transition-all cursor-pointer">
                   <CardHeader>
                     <div className="flex-1">
                       <CardTitle className="text-lg font-medium font-sans mb-2">

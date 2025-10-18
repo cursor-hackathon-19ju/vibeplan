@@ -2,272 +2,280 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowRight, Copy, Check, CalendarIcon } from "lucide-react"
+import { ArrowRight, Copy, Check, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { format } from "date-fns"
+import Image from "next/image"
 
 const activityTypes = [
-  "Outdoor",
-  "Sports",
-  "Shopping",
-  "Food",
-  "Museums",
-  "Thrift Store",
-  "Artsy",
-  "Games",
+    "Outdoor",
+    "Indoors",
+    "Sports",
+    "Shopping",
+    "Cafes",
+    "Museums",
+    "Thrift Store",
+    "Artsy",
+    "Games",
+]
+
+const paxOptions = [
+    { value: "solo", label: "Solo" },
+    { value: "date", label: "Date" },
+    { value: "double-date", label: "Double Date" },
+    { value: "3-5", label: "3-5" },
+    { value: "6-7", label: "6-7" },
+    { value: "8+", label: "8+" },
 ]
 
 const mbtiTypes = [
-  "INTJ", "INTP", "ENTJ", "ENTP",
-  "INFJ", "INFP", "ENFJ", "ENFP",
-  "ISTJ", "ISFJ", "ESTJ", "ESFJ",
-  "ISTP", "ISFP", "ESTP", "ESFP",
+    "INTJ", "INTP", "ENTJ", "ENTP",
+    "INFJ", "INFP", "ENFJ", "ENFP",
+    "ISTJ", "ISFJ", "ESTJ", "ESFJ",
+    "ISTP", "ISFP", "ESTP", "ESFP",
 ]
 
 const samplePrompts = [
-  "Plan a date under $50 with food, something artsy, and outdoors.",
-  "Weekend brunch spots with good vibes for 4 people.",
-  "Chill activities for introverts under $30.",
-  "Adventurous outdoor activities with a spicy nightlife twist.",
+    "Plan a date under $50 with food, something artsy, and outdoors.",
+    "Weekend brunch spots with good vibes for 4 people.",
+    "Chill activities for introverts under $30.",
+    "Adventurous outdoor activities with a spicy nightlife twist.",
 ]
 
-const budgetLabels = ["Broke Student", "Budget-Friendly", "Moderate", "Comfortable", "Atas Boss"]
+// Map slider percentage to budget categories
+const getBudgetCategory = (percentage: number): number => {
+    if (percentage <= 20) return 0 // Broke Student
+    if (percentage <= 40) return 1 // Budget-Friendly
+    if (percentage <= 60) return 2 // Moderate
+    if (percentage <= 80) return 3 // Comfortable
+    return 4 // Atas Boss
+}
 
 export function FilterOptions() {
-  const router = useRouter()
-  const [selectedActivities, setSelectedActivities] = useState<string[]>([])
-  const [numPax, setNumPax] = useState("")
-  const [budget, setBudget] = useState([2])
-  const [mbti, setMbti] = useState("")
-  const [spicy, setSpicy] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
-  const [startDate, setStartDate] = useState<string>("")
-  const [endDate, setEndDate] = useState<string>("")
+    const router = useRouter()
+    const [selectedActivities, setSelectedActivities] = useState<string[]>([])
+    const [numPax, setNumPax] = useState("")
+    const [budget, setBudget] = useState([50]) // 0-100 percentage
+    const [mbti, setMbti] = useState("")
+    const [spicy, setSpicy] = useState(false)
+    const [searchQuery, setSearchQuery] = useState("")
+    const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
 
-  const toggleActivity = (activity: string) => {
-    setSelectedActivities((prev) =>
-      prev.includes(activity)
-        ? prev.filter((a) => a !== activity)
-        : [...prev, activity]
-    )
-  }
-
-  const copyPrompt = (prompt: string, index: number) => {
-    setSearchQuery(prompt)
-    setCopiedIndex(index)
-    setTimeout(() => setCopiedIndex(null), 2000)
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    // Store search params
-    const searchParams = {
-      activities: selectedActivities,
-      numPax,
-      budget: budget[0],
-      mbti,
-      spicy,
-      query: searchQuery,
-      startDate,
-      endDate,
+    const toggleActivity = (activity: string) => {
+        setSelectedActivities((prev) =>
+            prev.includes(activity)
+                ? prev.filter((a) => a !== activity)
+                : [...prev, activity]
+        )
     }
 
-    // Navigate to loading page with search params
-    const params = new URLSearchParams()
-    params.set('data', JSON.stringify(searchParams))
-    router.push(`/loading?${params.toString()}`)
-  }
+    const copyPrompt = (prompt: string, index: number) => {
+        setSearchQuery(prompt)
+        setCopiedIndex(index)
+        setTimeout(() => setCopiedIndex(null), 2000)
+    }
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6 pb-8">
-      {/* Activity Type */}
-      <div className="space-y-3">
-        <label className="text-sm font-medium block">
-          Activity Type <span className="text-muted-foreground font-normal">(optional)</span>
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {activityTypes.map((activity) => (
-            <Badge
-              key={activity}
-              variant={selectedActivities.includes(activity) ? "default" : "outline"}
-              className="cursor-pointer px-4 py-2 text-sm hover:opacity-80 transition-opacity"
-              onClick={() => toggleActivity(activity)}
-            >
-              {activity}
-            </Badge>
-          ))}
-        </div>
-      </div>
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
 
-      {/* Number of Pax and MBTI - Side by side on desktop */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-3">
-          <label htmlFor="numPax" className="text-sm font-medium block">
-            Number of Pax <span className="text-muted-foreground font-normal">(optional)</span>
-          </label>
-          <Input
-            id="numPax"
-            type="number"
-            min="1"
-            placeholder="e.g., 2"
-            value={numPax}
-            onChange={(e) => setNumPax(e.target.value)}
-          />
-        </div>
+        // Store search params with budget mapped to category
+        const searchParams = {
+            activities: selectedActivities,
+            numPax,
+            budget: getBudgetCategory(budget[0]),
+            mbti,
+            spicy,
+            query: searchQuery,
+        }
 
-        <div className="space-y-3">
-          <label htmlFor="mbti" className="text-sm font-medium block">
-            MBTI <span className="text-muted-foreground font-normal">(optional)</span>
-          </label>
-          <Select value={mbti} onValueChange={setMbti}>
-            <SelectTrigger id="mbti">
-              <SelectValue placeholder="Select your MBTI" />
-            </SelectTrigger>
-            <SelectContent>
-              {mbtiTypes.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+        // Navigate to loading page with search params
+        const params = new URLSearchParams()
+        params.set('data', JSON.stringify(searchParams))
+        router.push(`/loading?${params.toString()}`)
+    }
 
-      {/* Budget Slider */}
-      <div className="space-y-3">
-        <label className="text-sm font-medium block">
-          Budget <span className="text-muted-foreground font-normal">(optional)</span>
-        </label>
-        <div className="px-2">
-          <Slider
-            value={budget}
-            onValueChange={setBudget}
-            max={4}
-            step={1}
-            className="mb-2"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground mt-4">
-            {budgetLabels.map((label, idx) => (
-              <span
-                key={label}
-                className={budget[0] === idx ? "text-primary font-semibold" : ""}
-              >
-                {label}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4 pb-8">
+            <div className="text-center">
+                <h2 className="font-serif text-2xl md:text-3xl text-primary">
+                    What&apos;s on your mind for this weekend?
+                </h2>
+            </div>
+            {/* Preference Selectors Container */}
+            <div className="max-w-2xl mx-auto border border-primary/30 rounded-lg p-4 space-y-4">
+                {/* Two Column Layout */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Left Column: Activity Type + Number of Pax */}
+                    <div className="space-y-4">
+                        {/* Activity Type */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-medium block">
+                                Activity Type
+                            </label>
+                            <div className="flex flex-wrap gap-1.5">
+                                {activityTypes.map((activity) => (
+                                    <Badge
+                                        key={activity}
+                                        variant={selectedActivities.includes(activity) ? "default" : "outline"}
+                                        className="cursor-pointer px-2.5 py-0.5 text-[10px] border select-none"
+                                        onClick={() => toggleActivity(activity)}
+                                    >
+                                        {activity}
+                                    </Badge>
+                                ))}
+                            </div>
+                        </div>
 
-      {/* Date Range */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-3">
-          <label htmlFor="startDate" className="text-sm font-medium block">
-            Start Date <span className="text-muted-foreground font-normal">(optional)</span>
-          </label>
-          <Input
-            id="startDate"
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-        </div>
+                        {/* Number of Pax */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-medium block">
+                                Number of Pax
+                            </label>
+                            <div className="flex flex-wrap gap-1.5">
+                                {paxOptions.map((option) => (
+                                    <Badge
+                                        key={option.value}
+                                        variant={numPax === option.value ? "default" : "outline"}
+                                        className="cursor-pointer px-2.5 py-0.5 text-[10px] border select-none"
+                                        onClick={() => setNumPax(option.value)}
+                                    >
+                                        {option.label}
+                                    </Badge>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
 
-        <div className="space-y-3">
-          <label htmlFor="endDate" className="text-sm font-medium block">
-            End Date <span className="text-muted-foreground font-normal">(optional)</span>
-          </label>
-          <Input
-            id="endDate"
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-        </div>
-      </div>
+                    {/* Right Column: Budget + MBTI + Spicy */}
+                    <div className="space-y-4">
+                        {/* Budget Slider */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-medium block">
+                                Budget
+                            </label>
+                            <div className="px-2">
+                                <Slider
+                                    value={budget}
+                                    onValueChange={setBudget}
+                                    max={100}
+                                    step={1}
+                                    className="mb-2"
+                                />
+                                <div className="flex justify-between text-[10px] text-muted-foreground mt-2">
+                                    <span>Broke (&lt;$30)</span>
+                                    <span>Baller ($100+)</span>
+                                </div>
+                            </div>
+                        </div>
 
-      {/* Spicy Option */}
-      <div className="flex items-center justify-between p-4 border rounded-lg">
-        <div>
-          <label htmlFor="spicy" className="text-sm font-medium block">
-            Spicy Option 🌶️
-          </label>
-          <p className="text-xs text-muted-foreground mt-1">
-            Include drinks & nightlife recommendations
-          </p>
-        </div>
-        <Switch id="spicy" checked={spicy} onCheckedChange={setSpicy} />
-      </div>
+                        {/* MBTI */}
+                        <div className="space-y-2">
+                            <Select value={mbti} onValueChange={setMbti}>
+                                <SelectTrigger id="mbti" className="h-8 text-xs">
+                                    <SelectValue placeholder="Select your MBTI" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {mbtiTypes.map((type) => (
+                                        <SelectItem key={type} value={type}>
+                                            {type}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
 
-      {/* Sample Prompts */}
-      <div className="space-y-3">
-        <label className="text-sm font-medium block">
-          Sample Prompts
-        </label>
-        <div className="grid grid-cols-1 gap-2">
-          {samplePrompts.map((prompt, index) => (
-            <Card
-              key={index}
-              className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => copyPrompt(prompt, index)}
-            >
-              <CardContent className="flex items-center justify-between p-4">
-                <p className="text-sm flex-1">{prompt}</p>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="ml-2 shrink-0"
-                >
-                  {copiedIndex === index ? (
-                    <Check className="h-4 w-4 text-green-600" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
+                        {/* Spicy Option */}
+                        <div className="flex items-center justify-between p-2.5 border-2 border-primary/30 rounded-lg">
+                            <div>
+                                <label htmlFor="spicy" className="text-[10px] font-medium block">
+                                    Spicy Option 🌶️
+                                </label>
+                                <p className="text-[10px] text-muted-foreground mt-0.5">
+                                    Include drinks & nightlife
+                                </p>
+                            </div>
+                            <Switch id="spicy" checked={spicy} onCheckedChange={setSpicy} />
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-      {/* Main Search Input */}
-      <div className="space-y-3">
-        <label htmlFor="searchQuery" className="text-sm font-medium block">
-          What's on your mind? <span className="text-destructive">*</span>
-        </label>
-        <div className="flex gap-2">
-          <Input
-            id="searchQuery"
-            type="text"
-            placeholder="so what's on your mind for this weekend"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1"
-            required
-          />
-          <Button type="submit" size="icon" className="shrink-0">
-            <ArrowRight className="h-5 w-5" />
-            <span className="sr-only">Generate activities</span>
-          </Button>
-        </div>
-      </div>
-    </form>
-  )
+            {/* Main Search Input */}
+            <div className="space-y-3">
+                <Card className="relative">
+                    <CardContent className="p-0">
+                        <textarea
+                            id="searchQuery"
+                            placeholder="Describe your ideal activity..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full min-h-[200px] p-6 pb-20 bg-transparent border-none focus:outline-none focus:ring-0 resize-none text-base"
+                            required
+                        />
+                        <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">Sources:</span>
+                                <div className="flex gap-2">
+                                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs">
+                                        TG
+                                    </div>
+                                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs">
+                                        IG
+                                    </div>
+                                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs">
+                                        L8
+                                    </div>
+                                </div>
+                            </div>
+                            <Button type="submit" size="icon" className="h-10 w-10">
+                                <Send className="h-5 w-5" />
+                                <span className="sr-only">Generate activities</span>
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Sample Prompts */}
+            <div className="space-y-2 max-w-2xl mx-auto">
+                <Card>
+                    <CardContent className="p-2 space-y-1">
+                        {samplePrompts.map((prompt, index) => (
+                            <div
+                                key={index}
+                                className="flex items-center justify-between py-1 px-2 rounded-md cursor-pointer hover:bg-primary/5 transition-colors"
+                                onClick={() => copyPrompt(prompt, index)}
+                            >
+                                <p className="text-[10px] flex-1">{prompt}</p>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="ml-2 shrink-0 h-5 w-5"
+                                >
+                                    {copiedIndex === index ? (
+                                        <Check className="h-3 w-3 text-green-600" />
+                                    ) : (
+                                        <Copy className="h-3 w-3" />
+                                    )}
+                                </Button>
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+            </div>
+        </form>
+    )
 }
 
