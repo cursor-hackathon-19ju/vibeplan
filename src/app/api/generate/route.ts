@@ -1,84 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // TODO: Replace this with actual AI/LLM integration and database queries
-// This is a placeholder that returns mock data
-
-const mockActivities = [
-  {
-    id: 1,
-    name: "Gardens by the Bay",
-    description: "Explore the stunning Supertree Grove and Cloud Forest with your loved one. Perfect for photography and leisurely walks.",
-    category: "Outdoor",
-    price: "$28 per person",
-    duration: "2-3 hours",
-    location: "Marina Bay",
-    pax: "2 people",
-    tags: ["Nature", "Photography", "Romantic"],
-    imageUrl: "https://images.unsplash.com/photo-1565967511849-76a60a516170?w=800&q=80"
-  },
-  {
-    id: 2,
-    name: "Tiong Bahru Breakfast Walk",
-    description: "Start your day with local breakfast spots and explore the charming Art Deco architecture of Singapore's oldest housing estate.",
-    category: "Food",
-    price: "$15 per person",
-    duration: "2 hours",
-    location: "Tiong Bahru",
-    pax: "2 people",
-    tags: ["Local", "Breakfast", "Heritage"],
-    imageUrl: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=80"
-  },
-  {
-    id: 3,
-    name: "National Gallery Singapore",
-    description: "Discover Southeast Asian art at this stunning gallery housed in the former Supreme Court and City Hall buildings.",
-    category: "Artsy",
-    price: "$20 per person",
-    duration: "3-4 hours",
-    location: "Civic District",
-    pax: "2 people",
-    tags: ["Art", "Culture", "Indoor"],
-    imageUrl: "https://images.unsplash.com/photo-1577083552431-6e5fd01988ec?w=800&q=80"
-  },
-  {
-    id: 4,
-    name: "East Coast Park Cycling",
-    description: "Rent bikes and enjoy a scenic ride along the coast. Stop for coconuts and seafood at the hawker centers.",
-    category: "Outdoor",
-    price: "$10 per person",
-    duration: "2-3 hours",
-    location: "East Coast",
-    pax: "2 people",
-    tags: ["Active", "Beach", "Affordable"],
-    imageUrl: "https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?w=800&q=80"
-  },
-  {
-    id: 5,
-    name: "Haji Lane Street Art Tour",
-    description: "Wander through colorful murals and quirky boutiques in this hipster enclave. Perfect for Instagram-worthy shots.",
-    category: "Artsy",
-    price: "Free",
-    duration: "1-2 hours",
-    location: "Kampong Glam",
-    pax: "2 people",
-    tags: ["Photography", "Shopping", "Free"],
-    imageUrl: "https://images.unsplash.com/photo-1513407030348-c983a97b98d8?w=800&q=80"
-  },
-  {
-    id: 6,
-    name: "Hawker Center Food Trail",
-    description: "Sample Singapore's best local dishes across multiple hawker centers. From chicken rice to laksa, satay to char kway teow.",
-    category: "Food",
-    price: "$20 per person",
-    duration: "2-3 hours",
-    location: "Various",
-    pax: "2 people",
-    tags: ["Local", "Affordable", "Authentic"],
-    imageUrl: "https://images.unsplash.com/photo-1599785209707-a456fc1337bb?w=800&q=80"
-  },
-]
+// This is a placeholder that returns mock itinerary data
 
 export async function POST(request: NextRequest) {
+  
   try {
     const body = await request.json()
     
@@ -88,11 +14,11 @@ export async function POST(request: NextRequest) {
     // TODO: Implement actual AI/LLM logic here
     // 1. Parse user preferences and query
     // 2. Query your curated activities database
-    // 3. Use AI to rank and personalize recommendations
-    // 4. Return customized activity suggestions
+    // 3. Use AI to generate personalized itinerary with timeline
+    // 4. Return complete day plan with activities, descriptions, and coordinates
 
-    // For now, return mock data
-    // In production, you would filter and personalize based on:
+    // For now, return mock itinerary data
+    // In production, you would generate this based on:
     // - body.activities (selected activity types)
     // - body.budget (budget level 0-4)
     // - body.numPax (number of people)
@@ -101,31 +27,127 @@ export async function POST(request: NextRequest) {
     // - body.query (user's search query)
     // - body.startDate and body.endDate (date range)
 
-    // Simulate some filtering based on user input
-    let filteredActivities = [...mockActivities]
-    
-    if (body.activities && body.activities.length > 0) {
-      filteredActivities = filteredActivities.filter(activity =>
-        body.activities.includes(activity.category)
-      )
-    }
-
-    // If no activities match or no filter was applied, return all mock activities
-    if (filteredActivities.length === 0) {
-      filteredActivities = mockActivities
-    }
-
     // Simulate AI processing delay
     await new Promise(resolve => setTimeout(resolve, 500))
 
+    // TypeScript interfaces for the itinerary data
+    // interface Coordinates {
+    //   lat: number
+    //   lng: number
+    // }
+
+    // interface Activity {
+    //   id: number
+    //   time: string
+    //   title: string
+    //   description: string
+    //   location: string
+    //   price: string
+    //   discount?: string
+    //   imageUrl: string
+    //   coordinates: Coordinates
+    // }
+
+    // interface ItinerarySummary {
+    //   intro: string
+    //   description: string
+    //   budget: string
+    //   duration: string
+    //   area: string
+    //   perks: string
+    // }
+
+    // interface Itinerary {
+    //   title: string
+    //   summary: ItinerarySummary
+    //   activities: Activity[]
+    // }
+
+    // interface ResultsContentProps {
+    //   itinerary: Itinerary
+    // }
+
+    // Return mock itinerary in the expected format
     return NextResponse.json({
-      activities: filteredActivities,
-      query: body.query || 'your preferences',
+      title: "A sun-kissed escape: One Perfect day in Sentosa",
+      summary: {
+        intro: "☀️ Get ready for a sun-filled adventure across Sentosa Island — a day that balances sea breeze, local bites, and island thrills.",
+        description: "From sipping kopi at hidden cafés to soaring above the beach on a zipline, this itinerary brings together relaxation and adrenaline.",
+        budget: "$92.50 SGD (Save up to $24 with AI-exclusive discounts)",
+        duration: "8:00 AM – 9:30 PM (Full-day itinerary)",
+        area: "Sentosa Island + HarbourFront",
+        perks: "10% off dining · $5 attraction rebate · Free drink voucher"
+      },
+      activities: [
+        {
+          id: 1,
+          time: "8:00 AM - 9:00 AM",
+          title: "Breakfast at Yakun Kaya Toast",
+          description: "As the city stirs awake, stroll into <strong>Yakun Kaya Toast at VivoCity</strong> for the quintessential Singapore breakfast. For just <strong>$7.20</strong> with your AI pass, enjoy a <strong>10% discount</strong> on a set of soft-boiled eggs, thick kaya toast, and freshly brewed kopi. The chatter of commuters, the clinking of cups, and the faint scent of toasted bread mark the perfect start to your island day before you cross the bridge into Sentosa.",
+          location: "VivoCity, HarbourFront",
+          price: "$7.20",
+          discount: "10% off",
+          imageUrl: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=80",
+          coordinates: { lat: 1.2644, lng: 103.8220 }
+        },
+        {
+          id: 2,
+          time: "9:30 AM - 11:30 AM",
+          title: "Beach Walk & Swim at Siloso Beach",
+          description: "Cross the <strong>Sentosa Boardwalk</strong> and head straight to <strong>Siloso Beach</strong>. Feel the soft sand between your toes and dive into the gentle waves. The morning sun isn't too harsh yet, making it perfect for a refreshing swim. Grab a coconut from a nearby vendor <strong>($4)</strong> and relax under a palm tree, watching kayakers glide across the turquoise waters.",
+          location: "Siloso Beach, Sentosa",
+          price: "Free (Coconut: $4)",
+          imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",
+          coordinates: { lat: 1.2471, lng: 103.8096 }
+        },
+        {
+          id: 3,
+          time: "12:00 PM - 1:30 PM",
+          title: "Lunch at Coastes Beachside Café",
+          description: "Settle into <strong>Coastes</strong>, where the sea breeze meets comfort food. Order the signature fish and chips <strong>($18.50)</strong> or a hearty burger while watching the beach volleyball matches. With your AI discount, you'll save another <strong>10%</strong> and get a complimentary iced lemon tea. The laid-back vibe and ocean view make this the perfect midday pause.",
+          location: "Siloso Beach, Sentosa",
+          price: "$18.50",
+          discount: "10% off + Free drink",
+          imageUrl: "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&q=80",
+          coordinates: { lat: 1.2475, lng: 103.8090 }
+        },
+        {
+          id: 4,
+          time: "2:00 PM - 4:00 PM",
+          title: "MegaZip Adventure & Skyline Luge",
+          description: "Time for adrenaline! Soar <strong>450 meters</strong> across the jungle canopy on the <strong>MegaZip zipline</strong>, ending with a splash landing on Siloso Beach. Then, race down <strong>Skyline Luge Sentosa's</strong> winding tracks with panoramic views of the South China Sea. The combo ticket, usually <strong>$65</strong>, is yours for <strong>$55</strong> with the <strong>AI attraction rebate</strong>.",
+          location: "Imbiah Lookout, Sentosa",
+          price: "$55",
+          discount: "$10 rebate",
+          imageUrl: "https://images.unsplash.com/photo-1624286763166-c0e36ce59daf?w=800&q=80",
+          coordinates: { lat: 1.2494, lng: 103.8182 }
+        },
+        {
+          id: 5,
+          time: "6:00 PM - 7:30 PM",
+          title: "Sunset at Fort Siloso Skywalk",
+          description: "Wind down your adventure at the <strong>Fort Siloso Skywalk</strong>, a glass-bottom walkway <strong>11 stories high</strong>. Watch the sun dip into the horizon, painting the sky in shades of amber and rose. Entry is just <strong>$5</strong>, and the views of the harbor, container ships, and neighboring islands are nothing short of spectacular.",
+          location: "Fort Siloso, Sentosa",
+          price: "$5",
+          imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+          coordinates: { lat: 1.2493, lng: 103.8069 }
+        },
+        {
+          id: 6,
+          time: "8:00 PM - 9:30 PM",
+          title: "Dinner & Wings of Time Show",
+          description: "Cap off the night with dinner at one of <strong>Sentosa's beachfront restaurants</strong> before catching the <strong>Wings of Time show at 8:40 PM</strong>. This open-air pyrotechnic and water show blends fire, lasers, and storytelling against the ocean backdrop. Best of all? It's <strong>free to watch</strong> from the beach, making it the perfect finale to your island escape.",
+          location: "Beach Station, Sentosa",
+          price: "Free (Dinner est. $25)",
+          imageUrl: "https://images.unsplash.com/photo-1533929736458-ca588d08c8be?w=800&q=80",
+          coordinates: { lat: 1.2500, lng: 103.8140 }
+        }
+      ]
     })
   } catch (error) {
-    console.error('Error generating activities:', error)
+    console.error('Error generating itinerary:', error)
     return NextResponse.json(
-      { error: 'Failed to generate activities' },
+      { error: 'Failed to generate itinerary' },
       { status: 500 }
     )
   }

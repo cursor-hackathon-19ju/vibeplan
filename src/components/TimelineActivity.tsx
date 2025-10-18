@@ -6,12 +6,16 @@ interface TimelineActivity {
   id: number
   time: string
   title: string
-  description: string | React.ReactNode
+  description: string
   location: string
   price?: string
   imageUrl?: string
   tags?: string[]
   discount?: string
+  coordinates?: {
+    lat: number
+    lng: number
+  }
 }
 
 interface TimelineActivityProps {
@@ -43,9 +47,10 @@ export function TimelineActivity({ activity, isLast = false }: TimelineActivityP
         </div>
         
         {/* Description */}
-        <p className="text-muted-foreground leading-relaxed mb-4">
-          {activity.description}
-        </p>
+        <div 
+          className="text-muted-foreground leading-relaxed mb-4"
+          dangerouslySetInnerHTML={{ __html: activity.description }}
+        />
         
         {/* Metadata */}
         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-4">
