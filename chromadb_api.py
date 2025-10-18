@@ -12,6 +12,10 @@ import chromadb
 from chromadb.utils import embedding_functions
 import os
 import json
+from dotenv import load_dotenv
+
+# Load environment variables from .env.local
+load_dotenv('.env.local')
 
 app = FastAPI(title="ChromaDB API Bridge", version="1.0.0")
 
