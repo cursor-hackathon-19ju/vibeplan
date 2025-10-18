@@ -3,7 +3,7 @@ fastapi==0.115.5
 uvicorn[standard]==0.34.0
 
 # ChromaDB and Embeddings
-chromadb==0.5.23
+chromadb==1.2.0
 openai==2.5.0
 
 # Utilities
