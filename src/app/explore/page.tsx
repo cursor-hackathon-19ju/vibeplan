@@ -189,7 +189,7 @@ export default function ExplorePage() {
               <Link key={item.id} href={`/results?id=${item.id}`}>
                 <Card className="hover:border-cyan-400 transition-all cursor-pointer">
                   <CardHeader>
-                    <div className="flex items-start justify-between">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
                       <div className="flex-1">
                         <CardTitle className="text-lg font-medium font-sans mb-2">
                           {item.query || "Untitled itinerary"}
@@ -202,7 +202,7 @@ export default function ExplorePage() {
                       </div>
 
                       {/* User Profile */}
-                      <div className="flex items-center gap-2 ml-4">
+                      <div className="flex items-center gap-2">
                         {item.user_profile?.avatar_url ? (
                           <img
                             src={item.user_profile.avatar_url}

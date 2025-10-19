@@ -13,6 +13,8 @@ import {
   User,
   ChevronDown,
   Compass,
+  Video,
+  ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -135,7 +137,8 @@ export function Sidebar() {
             variant={isActive("/") ? "default" : "ghost"}
             className={cn(
               "w-full justify-start",
-              !isExpanded && "justify-center p-0 h-12 w-12"
+              !isExpanded && "justify-center p-0 h-12 w-12",
+              !isActive("/") && "border-2 border-gray-300"
             )}
           >
             <PlusCircle className="h-5 w-5" />
@@ -224,6 +227,38 @@ export function Sidebar() {
 
         {/* Spacer to push bottom items down */}
         <div className="flex-1" />
+
+        {/* Beta Video Card */}
+        {isExpanded && (
+          <div className="mb-6 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+            <div className="flex flex-col items-start gap-2 mb-2">
+              <div className="relative w-12 h-12 flex-shrink-0">
+                <Image
+                  src={IconLogo}
+                  alt="VibePlan"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              <p className="font-serif font-bold text-primary text-base">Vibeplan in Open Beta!</p>
+            </div>
+            <div className="text-xs">
+              <p className="text-muted-foreground mb-2">
+                Watch the video for a quick walkthrough
+              </p>
+              <a
+                href="https://drive.google.com/file/d/1GQ4iijbWHQM8856ji1QGDdPK3lo2KK-C/view"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-primary hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span>Watch demo</span>
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+          </div>
+        )}
 
         <Separator className="my-2 bg-primary/20" />
 

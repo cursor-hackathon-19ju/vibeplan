@@ -12,6 +12,7 @@ import {
   Info,
   User,
   Compass,
+  ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -113,11 +114,11 @@ export function MobileNav() {
                 </SheetTitle>
               </SheetHeader>
 
-              <nav className="flex flex-col space-y-4 mt-6">
+              <nav className="flex flex-col space-y-4 mt-6 overflow-y-auto max-h-[calc(100vh-120px)] pb-6">
                 <Link href="/" onClick={() => setOpen(false)}>
                   <Button
                     variant={isActive("/") ? "default" : "ghost"}
-                    className="w-full justify-start"
+                    className={`w-full justify-start ${!isActive("/") ? "border-2 border-gray-300" : ""}`}
                   >
                     <PlusCircle className="h-5 w-5 mr-2" />
                     New Activity
@@ -146,21 +147,28 @@ export function MobileNav() {
                   </Link>
                   <div className="ml-4 mt-2 space-y-1">
                     {historyItems.length > 0 ? (
-                      historyItems.map((item) => (
-                        <Link
-                          key={item.id}
-                          href={`/results?id=${item.id}`}
-                          onClick={() => setOpen(false)}
-                          className="block p-2 hover:bg-accent rounded-md"
-                        >
-                          <p className="text-sm font-medium">
-                            {item.query || "Untitled itinerary"}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {formatTimeAgo(item.created_at)}
-                          </p>
+                      <>
+                        {historyItems.slice(0, 5).map((item) => (
+                          <Link
+                            key={item.id}
+                            href={`/results?id=${item.id}`}
+                            onClick={() => setOpen(false)}
+                            className="block p-2 hover:bg-accent rounded-md"
+                          >
+                            <p className="text-sm font-medium">
+                              {item.query || "Untitled itinerary"}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {formatTimeAgo(item.created_at)}
+                            </p>
+                          </Link>
+                        ))}
+                        <Link href="/history" onClick={() => setOpen(false)}>
+                          <div className="px-2 py-2 hover:bg-accent rounded-md cursor-pointer text-sm font-medium text-[#25404D] underline">
+                            View all history
+                          </div>
                         </Link>
-                      ))
+                      </>
                     ) : (
                       <div className="p-2 text-sm text-muted-foreground">
                         No recent searches
@@ -170,6 +178,35 @@ export function MobileNav() {
                 </div>
 
                 <Separator />
+
+                {/* Beta Video Card */}
+                <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                  <div className="flex flex-col items-start gap-2 mb-2">
+                    <div className="relative w-12 h-12 flex-shrink-0">
+                      <Image
+                        src={IconLogo}
+                        alt="VibePlan"
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                    <p className="font-serif font-bold text-primary text-base">Vibeplan in Open Beta!</p>
+                  </div>
+                  <div className="text-xs">
+                    <p className="text-muted-foreground mb-2">
+                      Watch the video for a quick walkthrough
+                    </p>
+                    <a
+                      href="https://drive.google.com/file/d/1GQ4iijbWHQM8856ji1QGDdPK3lo2KK-C/view"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-primary hover:underline"
+                    >
+                      <span>Watch demo</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                </div>
 
                 <Link href="/about" onClick={() => setOpen(false)}>
                   <Button

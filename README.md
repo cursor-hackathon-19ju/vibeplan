@@ -3,7 +3,8 @@
 AI that plans your weekend in Singapore 🎉
 
 **🌐 Live App:** [https://vibeplan-app.vercel.app/](https://vibeplan-app.vercel.app/login)  
-**🔌 API Endpoint:** [https://vibeplan-chromadb-api.onrender.com](https://vibeplan-chromadb-api.onrender.com)
+**🔌 API Endpoint:** [https://vibeplan-chromadb-api.onrender.com](https://vibeplan-chromadb-api.onrender.com)  
+**🎥 Video Demo:** [Watch a quick walkthrough](https://drive.google.com/file/d/1GQ4iijbWHQM8856ji1QGDdPK3lo2KK-C/view) *(Open Beta)*
 
 ## Overview
 
