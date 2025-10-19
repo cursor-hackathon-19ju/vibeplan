@@ -177,93 +177,209 @@ Return ONLY the JSON, no explanations.`
   }
 }
 
-// Step 2: Enhance itinerary with your custom prompt
-export async function enhanceItinerary(
+// Step 2a: Enhance activity data (emojis + price formatting) - Fast task using gpt-4o-mini
+async function enhanceActivityData(
   selectedActivities: SelectedActivity[]
-): Promise<Itinerary> {
+): Promise<SelectedActivity[]> {
+  const startTime = Date.now()
   const openai = getOpenAIClient()
 
-  const prompt = `You are a world-class AI travel writer and data enhancer. You are given a list of JSON objects called "activities", each representing a travel experience.
+  const prompt = `You are a data enhancer. Enhance these activities:
 
-Your task:
+1. **Add contextual emojis to titles:**
+   - Prepend ONE relevant emoji (e.g., "🥐 Brunch at Cafe", "🎨 Art Gallery", "🌳 Park Visit")
 
-1. **Add contextual emojis to activity titles:**
-   - Prepend ONE relevant emoji that matches the activity type/vibe
-   - Examples: "🥐 Brunch at The Cozy Corner", "🎨 Art Gallery Visit", "🌳 Park Picnic", "🍸 Cocktails at Rooftop Bar"
-   - Choose emojis that feel natural and enhance readability
+2. **Format prices as strings:**
+   - If price is 0, null, or missing, estimate based on activity type:
+     * Café/local food: $5–$15
+     * Museum/attraction: $10–$40
+     * Premium experience: $50+
+     * Free outdoor: "Free"
 
-2. If an activity's "price" is 0, null, or missing, estimate a realistic price in SGD based on its type and context. Use reasonable Singapore price ranges:
-   - Café / local food: $5–$15
-   - Museum / attraction: $10–$40
-   - Premium / adventure experience: $50+
-   - Free outdoor / sightseeing: $0
-   Keep the price as a float with 2 decimals.
+   IMPORTANT: Format as STRING:
+   - Free activities: "Free" (not 0)
+   - Paid activities: "$25", "$12.50", etc.
 
-3. Keep all original fields (including coordinates, source_link, latitude, longitude), only update the "title" (with emoji) and "price" fields if needed.
+3. Keep ALL original fields (coordinates, source_link, latitude, longitude).
 
-4. Do NOT hallucinate or invent any information. Only include data that can be directly inferred from the provided activities JSON.
-
-5. For the "summary" section:
-   - If budget can be computed (sum of all activity prices), include it as: "$<total> SGD".
-   - If duration can be derived from timestamps in the activities (e.g., start/end time fields), include it as: "<start> – <end> (<approx duration>)".
-   - If area can be inferred from activity location fields (e.g., all mention 'Sentosa' or 'Marina Bay'), include it.
-   - If none of these can be derived, leave the field as an empty string ("").
-   - For "perks", extract ONLY actual deals mentioned verbatim in the activity descriptions (e.g. "10% off", "Free drink", "2-for-1"). If no deals exist, set "perks" to an empty string ("").
-
-5. Return a single JSON object in this exact structure:
-
+Return JSON:
 {
-  "title": "<short vivid headline>",
-  "summary": {
-    "intro": "<1–2 sentence engaging hook>",
-    "description": "<2–3 sentence overview of the day>",
-    "budget": "<total budget if derivable, else empty string>",
-    "duration": "<derived duration if possible, else empty string>",
-    "area": "<derived area if possible, else empty string>",
-    "perks": "<comma-separated list of real deals found, else empty string>"
-  },
-  "activities": [/* same list as input, with updated prices */]
+  "activities": [/* enhanced activities with emoji titles and formatted prices */]
 }
 
-Style and tone guidelines:
-- Title should sound like a travel magazine (e.g. "A Sun-Kissed Escape: One Perfect Day in Sentosa").
-- Intro sets the emotional vibe of the day.
-- Description should flow from morning → afternoon → evening if possible.
-- Use natural, descriptive language with at most 1–2 emojis.
-- NEVER fabricate or assume values for budget, duration, area, or perks.
-- Do NOT include explanations, reasoning, or code comments — only valid JSON.
-
-Example output:
-
-{
-  "title": "A Sun-Kissed Escape: One Perfect Day in Sentosa",
-  "summary": {
-    "intro": "☀️ Get ready for a sun-filled adventure across Sentosa Island — a day that balances sea breeze, local bites, and island thrills.",
-    "description": "From sipping kopi at hidden cafés to soaring above the beach on a zipline, this itinerary blends relaxation and adrenaline.",
-    "budget": "$92.50 SGD",
-    "duration": "8:00 AM – 9:30 PM (Full-day itinerary)",
-    "area": "Sentosa Island + HarbourFront",
-    "perks": "10% off dining, Free drink voucher"
-  },
-  "activities": []
-}
-
-Now, analyze the following activities JSON and return ONLY the final itinerary JSON:
-
+Activities to enhance:
 ${JSON.stringify(selectedActivities, null, 2)}`
 
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini', // Faster, cheaper model for simple data enhancement
       response_format: { type: 'json_object' },
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.7
+      temperature: 0.3 // Lower temperature for consistent formatting
     })
 
     const result = JSON.parse(response.choices[0].message.content || '{}')
-    console.log(`✅ Enhanced itinerary: "${result.title}"`)
+    const duration = Date.now() - startTime
+    console.log(`✅ Enhanced ${result.activities?.length || 0} activities with emojis and prices (${duration}ms)`)
+    return result.activities || selectedActivities
+  } catch (error) {
+    const duration = Date.now() - startTime
+    console.error(`❌ Activity enhancement error after ${duration}ms:`, error)
+    // Fallback: return original activities
+    return selectedActivities
+  }
+}
 
-    return result as Itinerary
+// Step 2b: Generate creative itinerary summary (title, intro, description) - Creative task using gpt-4o
+async function generateItinerarySummary(
+  activities: SelectedActivity[]
+): Promise<{ title: string; intro: string; description: string }> {
+  const startTime = Date.now()
+  const openai = getOpenAIClient()
+
+  // Create a simplified activity list for summary generation (no need for all fields)
+  const simplifiedActivities = activities.map(a => ({
+    title: a.title,
+    description: a.description,
+    location: a.location,
+    time: a.time
+  }))
+
+  const prompt = `You are a world-class travel writer. Create an engaging itinerary summary.
+
+Given these activities:
+${JSON.stringify(simplifiedActivities, null, 2)}
+
+Generate:
+1. **Title**: Travel magazine style (e.g., "A Sun-Kissed Escape: One Perfect Day in Sentosa")
+2. **Intro**: 1-2 sentence emotional hook (can include 1 emoji)
+3. **Description**: 2-3 sentences describing the day's flow (morning → afternoon → evening)
+
+Style:
+- Natural, descriptive language
+- Evocative but not over-the-top
+- Focus on the experience, not just listing activities
+
+Return JSON:
+{
+  "title": "<vivid headline>",
+  "intro": "<engaging hook>",
+  "description": "<overview of the day>"
+}
+
+Return ONLY the JSON, no explanations.`
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o', // Use full model for creative writing
+      response_format: { type: 'json_object' },
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.8 // Higher temperature for creativity
+    })
+
+    const result = JSON.parse(response.choices[0].message.content || '{}')
+    const duration = Date.now() - startTime
+    console.log(`✅ Generated itinerary summary: "${result.title}" (${duration}ms)`)
+    return {
+      title: result.title || 'Your Singapore Adventure',
+      intro: result.intro || '',
+      description: result.description || ''
+    }
+  } catch (error) {
+    const duration = Date.now() - startTime
+    console.error(`❌ Summary generation error after ${duration}ms:`, error)
+    // Fallback: return simple summary
+    return {
+      title: 'Your Singapore Itinerary',
+      intro: 'Discover the best of Singapore with this curated itinerary.',
+      description: 'Enjoy a day filled with memorable experiences across the city.'
+    }
+  }
+}
+
+// Step 2c: Calculate metadata (budget, duration, area, perks) - Structured task using gpt-4o-mini
+async function calculateMetadata(
+  activities: SelectedActivity[]
+): Promise<{ budget: string; duration: string; area: string; perks: string }> {
+  const startTime = Date.now()
+  const openai = getOpenAIClient()
+
+  const prompt = `Analyze these activities and extract metadata:
+
+${JSON.stringify(activities, null, 2)}
+
+Extract:
+1. **Budget**: Sum all prices. Format as "$XX SGD" or "$XX.XX SGD". If all free, use "$0 SGD".
+2. **Duration**: Extract from time fields. Format as "9:00 AM – 9:00 PM (12-hour itinerary)".
+3. **Area**: List neighborhoods/areas mentioned (e.g., "Sentosa + Marina Bay + Orchard").
+4. **Perks**: Extract ONLY actual deals from descriptions (e.g., "10% off", "Free drink"). If none, use empty string.
+
+Rules:
+- Only include data directly from the input
+- Do NOT make assumptions or estimates
+- If data is missing, use empty string ""
+
+Return JSON:
+{
+  "budget": "<calculated budget>",
+  "duration": "<time range>",
+  "area": "<locations>",
+  "perks": "<deals found or empty string>"
+}`
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini', // Fast model for structured extraction
+      response_format: { type: 'json_object' },
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.1 // Very low temperature for factual extraction
+    })
+
+    const result = JSON.parse(response.choices[0].message.content || '{}')
+    const duration = Date.now() - startTime
+    console.log(`✅ Calculated metadata: budget=${result.budget}, duration=${result.duration} (${duration}ms)`)
+    return {
+      budget: result.budget || '',
+      duration: result.duration || '',
+      area: result.area || '',
+      perks: result.perks || ''
+    }
+  } catch (error) {
+    const duration = Date.now() - startTime
+    console.error(`❌ Metadata calculation error after ${duration}ms:`, error)
+    // Fallback: return empty metadata
+    return { budget: '', duration: '', area: '', perks: '' }
+  }
+}
+
+// Step 2: Enhance itinerary with parallel processing (3x faster!)
+export async function enhanceItinerary(
+  selectedActivities: SelectedActivity[]
+): Promise<Itinerary> {
+  console.log('🚀 Starting parallel itinerary enhancement...')
+
+  try {
+    // Execute all three enhancements in parallel
+    const [enhancedActivities, summary, metadata] = await Promise.all([
+      enhanceActivityData(selectedActivities),        // ~2-3 seconds (gpt-4o-mini)
+      generateItinerarySummary(selectedActivities),   // ~4-5 seconds (gpt-4o)
+      calculateMetadata(selectedActivities)           // ~2-3 seconds (gpt-4o-mini)
+    ])
+
+    console.log('✅ All parallel enhancements completed')
+
+    return {
+      title: summary.title,
+      summary: {
+        intro: summary.intro,
+        description: summary.description,
+        budget: metadata.budget,
+        duration: metadata.duration,
+        area: metadata.area,
+        perks: metadata.perks
+      },
+      activities: enhancedActivities
+    }
   } catch (error) {
     console.error('❌ Itinerary enhancement error:', error)
     throw new Error('Failed to enhance itinerary')

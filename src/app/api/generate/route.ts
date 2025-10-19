@@ -17,6 +17,8 @@ function isVenueSpecificQuery(query: string): boolean {
 }
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now()
+  console.log('\n⏱️  ========== ITINERARY GENERATION STARTED ==========')
 
   try {
     const body = await request.json()
@@ -36,6 +38,7 @@ export async function POST(request: NextRequest) {
     console.log('📝 Semantic query:', semanticQuery)
 
     // STEP 2: Fetch activities from ChromaDB with multi-query strategy
+    const chromaStartTime = Date.now()
     let chromaActivities: any[] = []
     try {
       const isVenueQuery = isVenueSpecificQuery(body.query)
@@ -64,8 +67,11 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       console.warn('⚠️ ChromaDB query failed, continuing with Exa only:', error)
     }
+    const chromaTime = Date.now() - chromaStartTime
+    console.log(`⏱️  ChromaDB query took: ${chromaTime}ms`)
 
     // STEP 3: Fetch results from Exa (web search)
+    const exaStartTime = Date.now()
     const exa = new Exa(process.env.EXA_API_KEY);
     const refined_query = `I want to plan an activity that includes ${body.activities.length > 0 ? body.activities.join(', ') : 'a mix of activities'}, for a total of ${body.numPax || 'a few'} people. The budget is ${body.budget} on a scale of 0–4 (where 0 = <$30 and 4 = $100+). This plan is tailored for individuals with the MBTI type ${body.mbti || 'any type'}. ${body.spicy ? 'It should also include drinks and nightlife.' : ''} The main preference or goal is: "${body.query}".`
 
@@ -115,7 +121,9 @@ export async function POST(request: NextRequest) {
       ...JSON.parse(r.summary),
       url: r.url
     }));
+    const exaTime = Date.now() - exaStartTime
     console.log(`✅ Exa: Found ${exaSummaries.length} activities`)
+    console.log(`⏱️  Exa search took: ${exaTime}ms`)
 
     // STEP 4: Combine ChromaDB and Exa activities
     const combinedActivities = [
@@ -149,6 +157,7 @@ export async function POST(request: NextRequest) {
     }
 
     // STEP 5: Use LLM to select 4-6 best activities and arrange timeline
+    const selectionStartTime = Date.now()
     const selectedActivities = await selectAndArrangeActivities(
       combinedActivities,
       {
@@ -160,11 +169,16 @@ export async function POST(request: NextRequest) {
         activities: body.activities
       }
     )
+    const selectionTime = Date.now() - selectionStartTime
     console.log(`✅ Selected ${selectedActivities.length} activities`)
+    console.log(`⏱️  Activity selection took: ${selectionTime}ms`)
 
-    // STEP 6: Enhance itinerary with price estimation and summary
+    // STEP 6: Enhance itinerary with price estimation and summary (PARALLEL!)
+    const enhancementStartTime = Date.now()
     const itineraryData = await enhanceItinerary(selectedActivities)
+    const enhancementTime = Date.now() - enhancementStartTime
     console.log(`✅ Generated itinerary: "${itineraryData.title}"`)
+    console.log(`⏱️  Parallel enhancement took: ${enhancementTime}ms`)
 
     // Log final activity to verify fields are preserved
     if (itineraryData.activities && itineraryData.activities.length > 0) {
@@ -217,12 +231,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Return both the itinerary data and the database ID
+    const totalTime = Date.now() - startTime
+    console.log('\n⏱️  ========== TIMING SUMMARY ==========')
+    console.log(`   ChromaDB query:       ${chromaTime}ms`)
+    console.log(`   Exa search:           ${exaTime}ms`)
+    console.log(`   Activity selection:   ${selectionTime}ms`)
+    console.log(`   Parallel enhancement: ${enhancementTime}ms`)
+    console.log(`   TOTAL TIME:           ${totalTime}ms (${(totalTime/1000).toFixed(1)}s)`)
+    console.log('⏱️  =====================================\n')
+
     return NextResponse.json({
       ...itineraryData,
       itineraryId: itinerary.id
     })
   } catch (error) {
-    console.error('Error generating itinerary:', error)
+    const totalTime = Date.now() - startTime
+    console.error(`❌ Error generating itinerary after ${totalTime}ms:`, error)
     return NextResponse.json(
       { error: 'Failed to generate itinerary' },
       { status: 500 }
