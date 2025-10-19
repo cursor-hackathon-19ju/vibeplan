@@ -14,6 +14,7 @@ VibePlan is an AI-powered activity recommendation tool that helps you discover t
 ## ✨ Try It Now
 
 Visit the live app at **[vibeplan-app.vercel.app](https://vibeplan-app.vercel.app/)** and try these sample prompts:
+
 - "Plan a date under $50 with food, something artsy, and outdoors."
 - "Weekend brunch spots with good vibes for 4 people."
 - "Chill activities for introverts under $30."
@@ -385,6 +386,7 @@ curl -X POST https://vibeplan-chromadb-api.onrender.com/search \
 ```
 
 **Response Example:**
+
 ```json
 {
   "activities": [
@@ -824,8 +826,10 @@ VibePlan is deployed using a two-service architecture:
 5. Deploy!
 
 **Important:** Update the ChromaDB API endpoint in `src/app/api/generate/utils/chromaClient.ts` to point to your Render deployment:
+
 ```typescript
-const CHROMA_API_URL = process.env.CHROMA_API_URL || 'https://vibeplan-chromadb-api.onrender.com';
+const CHROMA_API_URL =
+  process.env.CHROMA_API_URL || "https://vibeplan-chromadb-api.onrender.com";
 ```
 
 ### Backend Deployment (Render.com)
@@ -905,7 +909,8 @@ Required for scraping Telegram channels and Instagram posts:
 | `SCRAPING_INTERVAL_HOURS`  | Hours between scraping runs                    | ❌ No    | `168`                         |
 | `DATABASE_URL`             | SQLite database path                           | ❌ No    | `sqlite:///data_ingestion.db` |
 
-**Note**: 
+**Note**:
+
 - **Local Development**: ChromaDB runs on `localhost:8001`
 - **Production**: ChromaDB API deployed at [https://vibeplan-chromadb-api.onrender.com](https://vibeplan-chromadb-api.onrender.com)
 - No additional configuration needed - the API automatically detects the environment
