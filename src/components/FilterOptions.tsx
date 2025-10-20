@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowRight, Copy, Check, Send } from "lucide-react"
+import { createClient } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -80,6 +81,8 @@ const getPaxValue = (paxOption: string): string | number => {
     }
 }
 
+const nameColors = ['#FA4616', '#6318F8', '#00876D', '#FF008D', '#E26394']
+
 export function FilterOptions() {
     const router = useRouter()
     const [selectedActivities, setSelectedActivities] = useState<string[]>([])
@@ -89,6 +92,27 @@ export function FilterOptions() {
     const [spicy, setSpicy] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
     const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
+    const [userName, setUserName] = useState<string>("")
+    const [nameColor, setNameColor] = useState<string>("")
+
+    const supabase = createClient()
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+                const name = user.user_metadata?.full_name || 
+                            user.user_metadata?.name || 
+                            user.email?.split('@')[0] || 
+                            "there"
+                setUserName(name)
+                // Randomly select a color from the palette
+                const randomColor = nameColors[Math.floor(Math.random() * nameColors.length)]
+                setNameColor(randomColor)
+            }
+        }
+        fetchUser()
+    }, [])
 
     const toggleActivity = (activity: string) => {
         setSelectedActivities((prev) =>
@@ -127,7 +151,7 @@ export function FilterOptions() {
         <form onSubmit={handleSubmit} className="space-y-4 pb-8">
             <div className="text-center">
                 <h2 className="font-serif text-2xl md:text-3xl text-primary">
-                    What&apos;s on your mind for this weekend?
+                    What&apos;s on your mind{userName && ","} <span className="font-sans" style={{ color: nameColor }}>{userName}?</span>
                 </h2>
             </div>
             {/* Preference Selectors Container */}
@@ -235,7 +259,7 @@ export function FilterOptions() {
                     <CardContent className="p-0">
                         <textarea
                             id="searchQuery"
-                            placeholder="Describe your ideal activity..."
+                            placeholder="Find me things to do this weekend, special deals, local events..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full min-h-[200px] p-6 pb-20 bg-transparent border-none focus:outline-none focus:ring-0 resize-none text-base"
